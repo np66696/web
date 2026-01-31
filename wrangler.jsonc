@@ -1,0 +1,8 @@
+{
+  "name": "my-worker",
+  "compatibility_date": "2026-01-31",
+  "main": "src/index.js",
+  "vars": {
+    "MY_VAR": "value"
+  }
+}
