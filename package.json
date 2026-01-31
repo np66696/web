@@ -1,0 +1,11 @@
+
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "wrangler:dev": "wrangler pages dev dist --compatibility-date=2024-01-01",
+    "dev:full": "concurrently \"npm run dev\" \"npm run wrangler:dev\""
+  }
+}
