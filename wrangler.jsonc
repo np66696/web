@@ -1,5 +1,7 @@
 {
-  "name": "nonlinear-animation-site",
+// wrangler.jsonc
+"name": "web",
+"name": "nonlinear-animation-site",
   "compatibility_date": "2026-05-16",
   "assets": {
     "directory": "./dist",
