@@ -1,6 +1,2 @@
-# Cloudflare Pages 路由配置
-# SPA fallback — 所有未匹配路由返回 index.html
+# Cloudflare Pages SPA 回退 — 所有路由返回 index.html
 /*    /index.html   200
-
-# API 请求转发到 Worker（生产环境通过路由绑定）
-# 本地开发: wrangler pages dev 会自动处理 functions/ 目录

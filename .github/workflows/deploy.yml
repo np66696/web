@@ -9,23 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          
+          node-version: "18"
+
       - name: Install dependencies
-        run: npm ci
-        
+        run: npm install
+
       - name: Build project
         run: npm run build
-        
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: animated-website
-          directory: dist
-          branch: main
+          command: pages deploy dist --project-name=animated-website --branch=main
