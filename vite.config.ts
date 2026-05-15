@@ -1,16 +1,15 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
 
 export default defineConfig({
-    root: './src',
+    root: '.',
     build: {
-        outDir: '../dist',
+        outDir: 'dist',
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                main: resolve(__dirname, 'src/index.html')
-            }
-        }
+                main: 'index.html',
+            },
+        },
     },
     server: {
         port: 3000,
@@ -18,8 +17,8 @@ export default defineConfig({
         proxy: {
             '/api': {
                 target: 'http://localhost:8787',
-                changeOrigin: true
-            }
-        }
-    }
+                changeOrigin: true,
+            },
+        },
+    },
 });

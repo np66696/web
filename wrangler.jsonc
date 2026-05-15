@@ -1,8 +1,14 @@
 {
-  "name": "my-worker",
+  "name": "animation-api",
   "compatibility_date": "2026-01-31",
-  "main": "src/index.js",
+  "main": "workers/animation-api.ts",
+  "routes": [
+    {
+      "pattern": "your-domain.com/api/*",
+      "zone_id": "YOUR_ZONE_ID"
+    }
+  ],
   "vars": {
-    "MY_VAR": "value"
+    "ENVIRONMENT": "production"
   }
 }
