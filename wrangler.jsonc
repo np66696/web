@@ -1,3 +1,7 @@
 {
-  "pages_build_output_dir": "dist"
+  "name": "web",
+  "main": "src/index.js",
+  "assets": {
+    "directory": "./dist"
+  }
 }
