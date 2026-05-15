@@ -1,9 +1,8 @@
 // Cloudflare Worker — 纯静态站点入口
-// 所有静态资源在 assets.directory (dist/) 中自动服务
+// Workers Assets 自动处理 dist/ 中的静态文件
 export default {
-  async fetch(request: Request, env: any, ctx: any): Promise<Response> {
-    // Workers Assets 会自动处理静态文件路由
-    // 这个 handler 是兜底逻辑
+  async fetch(request, env, ctx) {
+    // 所有静态文件由 Workers Assets 自动路由
     return new Response('Not Found', { status: 404 });
   },
 };
