@@ -1,2 +1,2 @@
-# Cloudflare Pages SPA 回退 — 所有路由返回 index.html
-/*    /index.html   200
+# SPA fallback 由 wrangler.jsonc 中的 not_found_handling 处理
+# 此文件保留用于 _headers 配置
