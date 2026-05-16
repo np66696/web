@@ -110,13 +110,21 @@ export function executeCosmicTransition(
     });
 
     // 时间线编排
+    const safeUrl = ALLOWED_TARGETS.includes(targetUrl) ? targetUrl : '/';
+    let navigated = false;
+
+    const doNavigate = () => {
+        if (navigated) return;
+        navigated = true;
+        window.location.href = safeUrl;
+    };
+
     const tl = gsap.timeline({
-        onComplete: () => {
-            // 安全校验：仅允许白名单内的相对路径
-            const safeUrl = ALLOWED_TARGETS.includes(targetUrl) ? targetUrl : '/';
-            window.location.href = safeUrl;
-        },
+        onComplete: doNavigate,
     });
+
+    // 安全兜底：即使 GSAP 回调失败，也确保在 duration+500ms 后导航
+    setTimeout(doNavigate, duration + 500);
 
     // 阶段1：虫洞入口 — 暗色覆盖层从按钮位置扩散
     tl.to(overlay, {
