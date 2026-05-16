@@ -4,102 +4,88 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ============ 统一滚动事件总线 (单次 RAF，避免多个 scroll listener 造成布局抖动) ============
+type ScrollCallback = (scrollY: number, progress: number) => void;
+const scrollCallbacks: ScrollCallback[] = [];
+let scrollTicking = false;
+
+function onGlobalScroll() {
+    if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(() => {
+            const scrollY = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? Math.min(scrollY / docHeight, 1) : 0;
+            for (const cb of scrollCallbacks) {
+                cb(scrollY, progress);
+            }
+            scrollTicking = false;
+        });
+    }
+}
+
+// 注册单个 scroll 监听，所有视差效果共享
+window.addEventListener('scroll', onGlobalScroll, { passive: true });
+
 /**
- * 非线性滚动进度映射
- * 将线性滚动进度转换为非线性进度
+ * 注册滚动回调并返回取消注册函数
  */
+export function registerScrollEffect(cb: ScrollCallback): () => void {
+    scrollCallbacks.push(cb);
+    return () => {
+        const idx = scrollCallbacks.indexOf(cb);
+        if (idx !== -1) scrollCallbacks.splice(idx, 1);
+    };
+}
+
+// ============ 非线性滚动进度映射 ============
+
 export function nonlinearProgress(linear: number, type: 'easeIn' | 'easeOut' | 'parallax' | 'wave' = 'easeOut'): number {
     const clamped = Math.max(0, Math.min(1, linear));
 
     switch (type) {
         case 'easeIn':
-            // 幂函数缓入
             return Math.pow(clamped, 3);
-
         case 'easeOut':
-            // 幂函数缓出
             return 1 - Math.pow(1 - clamped, 3);
-
         case 'parallax':
-            // 视差映射：开始快，后面慢
             return clamped * (2 - clamped);
-
         case 'wave':
-            // 波浪式：带有正弦振荡
             return clamped + Math.sin(clamped * Math.PI * 2) * 0.05 * (1 - clamped);
-
         default:
             return clamped;
     }
 }
 
-/**
- * 初始化视差滚动效果
- * 不同层级以不同非线性速率移动
- */
+// ============ 初始化函数 ============
+
 export function initParallaxScrolling(): void {
     const layers = gsap.utils.toArray<HTMLElement>('.parallax-layer .scroll-item');
+    const visuals = gsap.utils.toArray<HTMLElement>('.scroll-visual');
 
+    // 使用 GSAP ScrollTrigger 的 scrub，其已在内部做 RAF 优化
     layers.forEach((item, index) => {
-        // 每层不同的视差速率（非线性间隔）
-        const speed = 0.3 + index * 0.2;
         const direction = index % 2 === 0 ? 1 : -1;
-
-        gsap.fromTo(item, {
-            y: 100 * direction,
-            opacity: 0,
-        }, {
-            y: -100 * direction,
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: '#cosmic-journey',
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 0.8,
-            },
+        gsap.fromTo(item, { y: 100 * direction, opacity: 0 }, {
+            y: -100 * direction, opacity: 1, ease: 'none',
+            scrollTrigger: { trigger: '#cosmic-journey', start: 'top bottom', end: 'bottom top', scrub: 0.8 },
         });
     });
 
-    // 视觉元素的非线性缩放
-    const visuals = gsap.utils.toArray<HTMLElement>('.scroll-visual');
     visuals.forEach((visual, index) => {
         const scaleStart = 0.5 + index * 0.2;
-        gsap.fromTo(visual, {
-            scale: scaleStart,
-            rotate: -15 * (index + 1),
-        }, {
-            scale: 1.2,
-            rotate: 15 * (index + 1),
-            ease: 'power1.inOut',
-            scrollTrigger: {
-                trigger: '#cosmic-journey',
-                start: 'top 80%',
-                end: 'bottom 20%',
-                scrub: 0.6,
-            },
+        gsap.fromTo(visual, { scale: scaleStart, rotate: -15 * (index + 1) }, {
+            scale: 1.2, rotate: 15 * (index + 1), ease: 'power1.inOut',
+            scrollTrigger: { trigger: '#cosmic-journey', start: 'top 80%', end: 'bottom 20%', scrub: 0.6 },
         });
     });
 }
 
-/**
- * 初始化交错入场动画（非线性 stagger）
- */
 export function initStaggerReveal(): void {
-    const items = gsap.utils.toArray<HTMLElement>('.scroll-item');
-
-    ScrollTrigger.batch(items, {
+    ScrollTrigger.batch('.scroll-item', {
         onEnter: (batch) => {
-            gsap.fromTo(batch, {
-                y: 80,
-                opacity: 0,
-                scale: 0.9,
-            }, {
-                y: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                // 非线性交错：使用指数间隔
+            gsap.fromTo(batch, { y: 80, opacity: 0, scale: 0.9 }, {
+                y: 0, opacity: 1, scale: 1, duration: 1,
                 stagger: (index: number) => Math.pow(index + 1, 1.5) * 0.08,
                 ease: 'elastic.out(0.7, 0.3)',
             });
@@ -108,109 +94,65 @@ export function initStaggerReveal(): void {
     });
 }
 
-/**
- * 初始化滚动指示器动画
- * 根据滚动进度非线性渐变消失
- */
 export function initScrollIndicator(): void {
     const indicator = document.getElementById('scroll-indicator');
     if (!indicator) return;
-
     gsap.to(indicator, {
-        opacity: 0,
-        y: -20,
-        scrollTrigger: {
-            trigger: '#hero',
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0.5,
-        },
+        opacity: 0, y: -20,
+        scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.5 },
     });
 }
 
-/**
- * 初始化滚动驱动的非线性进度条变化
- */
 export function initScrollProgressEffects(): void {
-    // 页面滚动整体进度
     gsap.to('body', {
         scrollTrigger: {
-            trigger: 'body',
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 0.3,
+            trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.3,
             onUpdate: (self) => {
-                // 非线性进度映射
-                const progress = nonlinearProgress(self.progress, 'easeOut');
-                // 可以在此处驱动其他基于进度的效果
-                document.documentElement.style.setProperty('--scroll-progress', progress.toString());
+                document.documentElement.style.setProperty('--scroll-progress', nonlinearProgress(self.progress, 'easeOut').toString());
             },
         },
     });
 }
 
 /**
- * 初始化滚动进度条
+ * 滚动进度条（合并到统一 RAF）
  */
 export function initScrollProgressBar(): void {
-    // 创建进度条元素
     const progressBar = document.createElement('div');
     progressBar.id = 'scroll-progress-bar';
     document.body.appendChild(progressBar);
 
-    const updateProgress = () => {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+    registerScrollEffect((_, progress) => {
         progressBar.style.width = `${progress * 100}%`;
-        if (progress > 0.01) {
-            progressBar.style.opacity = '1';
-        } else {
-            progressBar.style.opacity = '0';
-        }
-    };
-
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    updateProgress();
+        progressBar.style.opacity = progress > 0.01 ? '1' : '0';
+    });
 }
 
 /**
- * 初始化 WebGL 背景滚动视差
- * 随滚动微调 WebGL 容器位置，产生深度感
+ * WebGL 背景视差（合并到统一 RAF）
  */
 export function initWebGLScrollParallax(): void {
     const container = document.getElementById('webgl-container');
     if (!container) return;
-
-    const updateParallax = () => {
-        const scrollY = window.scrollY;
-        const parallaxY = scrollY * 0.15;
-        container.style.transform = `translateY(${parallaxY}px)`;
-    };
-
-    window.addEventListener('scroll', updateParallax, { passive: true });
+    registerScrollEffect((scrollY) => {
+        container.style.transform = `translateY(${scrollY * 0.15}px)`;
+    });
 }
 
 /**
- * 初始化星云光晕滚动偏移
+ * 星云光晕偏移（合并到统一 RAF）
  */
 export function initNebulaScrollShift(): void {
     const nebulaOverlay = document.querySelector('.fixed.inset-0.z-0.pointer-events-none.opacity-30') as HTMLElement;
     if (!nebulaOverlay) return;
-
-    const updateShift = () => {
-        const scrollY = window.scrollY;
+    registerScrollEffect((scrollY) => {
         const shiftX = Math.sin(scrollY * 0.0005) * 20;
-        const shiftY = scrollY * 0.08;
-        nebulaOverlay.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
-    };
-
-    window.addEventListener('scroll', updateShift, { passive: true });
+        nebulaOverlay.style.transform = `translate(${shiftX}px, ${scrollY * 0.08}px)`;
+    });
 }
 
 /**
- * 初始化 Hero 区域滚动视差
- * Hero 内各元素随滚动以不同速率移动
+ * Hero 区域滚动视差（合并到统一 RAF）
  */
 export function initHeroScrollParallax(): void {
     const heroTitle = document.getElementById('hero-title');
@@ -219,8 +161,7 @@ export function initHeroScrollParallax(): void {
     const heroCta = document.getElementById('hero-cta');
     const scrollIndicator = document.getElementById('scroll-indicator');
 
-    const updateHeroParallax = () => {
-        const scrollY = window.scrollY;
+    registerScrollEffect((scrollY) => {
         const heroHeight = window.innerHeight;
         const progress = Math.min(scrollY / heroHeight, 1);
 
@@ -243,9 +184,7 @@ export function initHeroScrollParallax(): void {
         if (scrollIndicator) {
             scrollIndicator.style.opacity = `${1 - progress * 2}`;
         }
-    };
-
-    window.addEventListener('scroll', updateHeroParallax, { passive: true });
+    });
 }
 
 /**

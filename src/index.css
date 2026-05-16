@@ -68,10 +68,11 @@ html {
     background: linear-gradient(180deg, #4f46e5, #7c3aed);
 }
 
-/* 卡片入场动画基础 */
+/* 卡片入场动画基础（GSAP 驱动，CSS 仅设初始状态） */
+.card-visible .card,
 .card {
-    opacity: 0;
-    transform: translateY(40px);
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* 滚动项入场动画基础 */

@@ -1,8 +1,8 @@
 module.exports = {
     content: [
         './index.html',
+        './nasa.html',
         './src/**/*.{html,js,ts,css}',
-        './public/**/*.html',
     ],
     theme: {
         extend: {

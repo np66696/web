@@ -6,6 +6,9 @@ import gsap from 'gsap';
  * 点击 NASA 按钮时触发虫洞穿越效果，然后导航到目标页面
  */
 
+/** 允许的目标 URL 白名单 */
+const ALLOWED_TARGETS = ['/nasa.html', '/index.html', '/'];
+
 interface TransitionOptions {
     /** 过渡持续时间 (ms) */
     duration?: number;
@@ -109,8 +112,9 @@ export function executeCosmicTransition(
     // 时间线编排
     const tl = gsap.timeline({
         onComplete: () => {
-            // 导航到目标页面
-            window.location.href = targetUrl;
+            // 安全校验：仅允许白名单内的相对路径
+            const safeUrl = ALLOWED_TARGETS.includes(targetUrl) ? targetUrl : '/';
+            window.location.href = safeUrl;
         },
     });
 

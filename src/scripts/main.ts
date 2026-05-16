@@ -1,8 +1,8 @@
 // src/scripts/main.ts
 import '../index.css';
-import { initWebGLBackground } from './animation-system/three-animations';
+import { initWebGLBackground, disposeWebGLBackground } from './animation-system/three-animations';
 import { initAllGSAPAnimations } from './animation-system/gsap-animations';
-import { initAllScrollAnimations } from './animation-system/scroll-manager';
+import { initAllScrollAnimations, registerScrollEffect } from './animation-system/scroll-manager';
 import { initPageTransitions } from './animation-system/page-transition';
 import { PerformanceMonitor } from '../utils/performance-monitor';
 
@@ -13,14 +13,15 @@ import { PerformanceMonitor } from '../utils/performance-monitor';
 async function bootstrap(): Promise<void> {
     console.log('🚀 非线性动画系统启动中...');
 
-    PerformanceMonitor.measureAnimationPerformance(() => {
-        // 1. 初始化 WebGL 3D 背景（Three.js 粒子系统）
-        initWebGLBackground().then(() => {
-            console.log('✅ WebGL 背景初始化完成');
-        }).catch((err) => {
-            console.warn('⚠️ WebGL 背景初始化失败 (可能浏览器不支持):', err);
-        });
-    }, 'WebGL 初始化');
+    // 1. 异步初始化 WebGL 3D 背景（Three.js 粒子系统）
+    const webglStart = performance.now();
+    try {
+        await initWebGLBackground();
+        const webglEnd = performance.now();
+        console.log(`✅ WebGL 背景初始化完成 (${(webglEnd - webglStart).toFixed(2)}ms)`);
+    } catch (err) {
+        console.warn('⚠️ WebGL 背景初始化失败 (可能浏览器不支持):', err);
+    }
 
     // 2. 等待 DOM 完全就绪后初始化 GSAP 动画
     if (document.readyState === 'loading') {
@@ -35,18 +36,15 @@ async function bootstrap(): Promise<void> {
  */
 function initDOMAnimations(): void {
     PerformanceMonitor.measureAnimationPerformance(() => {
-        // GSAP 非线性动画（Hero、卡片、交互等）
         initAllGSAPAnimations();
         console.log('✅ GSAP 动画初始化完成');
     }, 'GSAP 初始化');
 
     PerformanceMonitor.measureAnimationPerformance(() => {
-        // 滚动驱动的非线性动画
         initAllScrollAnimations();
         console.log('✅ 滚动动画初始化完成');
     }, '滚动动画初始化');
 
-    // 初始化页面过渡效果
     initPageTransitions();
     console.log('✅ 页面过渡动画就绪');
 
@@ -56,7 +54,23 @@ function initDOMAnimations(): void {
 // 启动应用
 bootstrap().catch(console.error);
 
+// 页面卸载时清理资源（防止内存泄漏）
+window.addEventListener('beforeunload', () => {
+    disposeWebGLBackground();
+});
+
+// 页面隐藏时暂停非必要动画（节省资源）
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Three.js 的 requestAnimationFrame 在页面隐藏时自动暂停
+        console.debug('🔋 页面隐藏，动画资源已自动优化');
+    }
+});
+
 // 热更新支持 (HMR)
 if (import.meta.hot) {
     import.meta.hot.accept();
+    import.meta.hot.dispose(() => {
+        disposeWebGLBackground();
+    });
 }

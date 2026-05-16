@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>探索宇宙 · Cosmic Explorer</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://api.nasa.gov https://apod.nasa.gov https://www.youtube.com; connect-src 'self' https://api.nasa.gov; frame-src 'self' https://www.youtube.com; font-src 'self';" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>" />
 </head>
 <body class="bg-[#020510] text-white overflow-x-hidden">
@@ -81,17 +82,17 @@
                 <h2 class="text-4xl md:text-5xl font-bold mt-3" style="background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">宇宙天体</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full">
-                <div onclick="window.open('https://baike.baidu.com/item/%E8%84%89%E5%86%B2%E6%98%9F', '_blank')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-indigo-500/15 hover:border-indigo-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看脉冲星百科">
+                <div onclick="window.open('https://baike.baidu.com/item/%E8%84%89%E5%86%B2%E6%98%9F', '_blank', 'noopener,noreferrer')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-indigo-500/15 hover:border-indigo-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看脉冲星百科">
                     <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">🪐</div>
                     <h3 class="text-xl font-bold mb-2 text-indigo-200">脉冲星</h3>
                     <p class="text-indigo-300/50 text-sm leading-relaxed">高速旋转的中子星，以精确的周期释放电磁辐射脉冲</p>
                 </div>
-                <div onclick="window.open('https://baike.baidu.com/item/%E6%98%9F%E4%BA%91', '_blank')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-purple-500/15 hover:border-purple-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看星云百科">
+                <div onclick="window.open('https://baike.baidu.com/item/%E6%98%9F%E4%BA%91', '_blank', 'noopener,noreferrer')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-purple-500/15 hover:border-purple-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看星云百科">
                     <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">🌌</div>
                     <h3 class="text-xl font-bold mb-2 text-purple-200">星云</h3>
                     <p class="text-purple-300/50 text-sm leading-relaxed">由尘埃、氢气与等离子体组成的星际云，恒星的诞生之地</p>
                 </div>
-                <div onclick="window.open('https://baike.baidu.com/item/%E4%BC%BD%E9%A9%AC%E5%B0%84%E7%BA%BF%E6%9A%B4', '_blank')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-violet-500/15 hover:border-violet-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看伽马射线暴百科">
+                <div onclick="window.open('https://baike.baidu.com/item/%E4%BC%BD%E9%A9%AC%E5%B0%84%E7%BA%BF%E6%9A%B4', '_blank', 'noopener,noreferrer')" class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-violet-500/15 hover:border-violet-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80 cursor-pointer" title="查看伽马射线暴百科">
                     <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">⚡</div>
                     <h3 class="text-xl font-bold mb-2 text-violet-200">伽马射线暴</h3>
                     <p class="text-violet-300/50 text-sm leading-relaxed">宇宙中最剧烈的爆炸，瞬间释放超越整个星系的能量</p>

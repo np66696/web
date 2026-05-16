@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>NASA APOD Explorer</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.nasa.gov; frame-src 'self' https://www.youtube.com; font-src 'self';" />
     <style>
         /* ======== RESET & BASE ======== */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -631,8 +632,16 @@
             gridEl.hidden    = true;
             carouselSection.hidden = true;
 
-            fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=6')
+            // AbortController 支持超时取消
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
+
+            fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=6', {
+                signal: controller.signal,
+                referrerPolicy: 'no-referrer',
+            })
                 .then(function(resp){
+                    clearTimeout(timeoutId);
                     if(!resp.ok) throw new Error('HTTP ' + resp.status);
                     return resp.json();
                 })
@@ -646,6 +655,7 @@
                     render();
                 })
                 .catch(function(err){
+                    clearTimeout(timeoutId);
                     console.error('NASA API error:', err);
                     loadingEl.hidden = true;
                     errorEl.hidden   = false;
@@ -854,18 +864,30 @@
             if(newLang) setLang(newLang);
         });
 
-        /* ========== BLOCK PULL-TO-REFRESH ========== */
+        /* ========== BLOCK PULL-TO-REFRESH (安全处理) ========== */
         document.addEventListener('touchmove', function(e){
             if(lightbox.classList.contains('open')){
-                if(e.target.closest('.lightbox-content')) return;
+                if(!e.target.closest('.lightbox-content')){
+                    e.preventDefault();
+                }
             }
         }, { passive: false });
 
         /* ========== UTILS ========== */
+        var escCache = Object.create(null);
         function esc(str){
-            var d = document.createElement('div');
-            d.appendChild(document.createTextNode(str));
-            return d.innerHTML;
+            if(str == null) return '';
+            var s = '' + str;
+            if(escCache[s]) return escCache[s];
+            // 仅转义 HTML 关键字符，避免创建 DOM 元素的开销
+            var result = s
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            escCache[s] = result;
+            return result;
         }
 
         /* ========== INIT ========== */
