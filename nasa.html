@@ -602,28 +602,19 @@
         var swipeDelta   = 0;
         var activePointerType = '';
 
-        /* ========== FETCH ========== */
-        function preloadImages(data){
-            // Returns a promise that resolves when all HD images load, or 8s timeout
-            var jobs = data.map(function(item){
-                var src = item.hdurl || item.url;
-                // Skip non-image URLs (YouTube embeds etc.)
-                if(/youtube\.com|youtu\.be|vimeo\.com/i.test(src)){
-                    return Promise.resolve();
-                }
-                return new Promise(function(resolve){
-                    var img = new Image();
-                    var done = false;
-                    var finish = function(){ if(!done){ done=true; resolve(); } };
-                    img.onload  = finish;
-                    img.onerror = finish;
-                    img.src = src;
-                });
-            });
-            return Promise.race([
-                Promise.all(jobs),
-                new Promise(function(resolve){ setTimeout(resolve, 8000); })
-            ]);
+        /* ========== PRELOAD FIRST IMAGES (non-blocking) ========== */
+        function preloadFirstImages(data, count){
+            count = Math.min(count || 2, data.length);
+            for(var i = 0; i < count; i++){
+                var src = data[i].hdurl || data[i].url;
+                if(/youtube\.com|youtu\.be|vimeo\.com/i.test(src)) continue;
+                var link = document.createElement('link');
+                link.rel = 'preload';
+                link.as = 'image';
+                link.href = src;
+                link.fetchpriority = 'high';
+                document.head.appendChild(link);
+            }
         }
 
         function fetchData(){
@@ -648,8 +639,9 @@
                 .then(function(data){
                     if(!data || !data.length) throw new Error('Empty response');
                     apodData = data;
-                    // Preload all HD images before revealing UI
-                    return preloadImages(apodData);
+                    // 立即渲染（不等图片加载），预加载前 2 张可见图
+                    render();
+                    preloadFirstImages(apodData, 2);
                 })
                 .then(function(){
                     render();
@@ -683,7 +675,7 @@
                 card.setAttribute('aria-label', t('viewItem') + item.title);
                 card.innerHTML =
                     '<div class="card-image-wrap">' +
-                        '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" loading="lazy" />' +
+                        '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" loading="lazy" decoding="async"' + (i < 2 ? ' fetchpriority="high"' : '') + ' />' +
                     '</div>' +
                     '<div class="card-body">' +
                         '<p class="date">' + esc(item.date) + '</p>' +
@@ -714,7 +706,7 @@
                 slide.className = 'carousel-slide';
                 slide.setAttribute('draggable', 'false');
                 slide.innerHTML =
-                    '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" draggable="false" />' +
+                    '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" draggable="false" decoding="async" loading="lazy" />' +
                     '<div class="carousel-slide-caption">' +
                         '<h3>' + esc(item.title) + '</h3>' +
                         '<p class="date">' + esc(item.date) + '</p>' +
