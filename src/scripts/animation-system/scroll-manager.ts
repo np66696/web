@@ -53,7 +53,7 @@ export function initParallaxScrolling(): void {
             opacity: 1,
             ease: 'none',
             scrollTrigger: {
-                trigger: '#scroll-demo',
+                trigger: '#cosmic-journey',
                 start: 'top bottom',
                 end: 'bottom top',
                 scrub: 0.8,
@@ -73,7 +73,7 @@ export function initParallaxScrolling(): void {
             rotate: 15 * (index + 1),
             ease: 'power1.inOut',
             scrollTrigger: {
-                trigger: '#scroll-demo',
+                trigger: '#cosmic-journey',
                 start: 'top 80%',
                 end: 'bottom 20%',
                 scrub: 0.6,

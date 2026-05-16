@@ -115,10 +115,17 @@ export function initHeroAnimations(): void {
             { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.7)' },
             '-=0.3',
         );
-        tl.fromTo('#btn-secondary',
+        tl.fromTo('#btn-nasa',
             { scale: 0, opacity: 0 },
             { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.7)' },
             '-=0.5',
+        );
+
+        // Hero badge 淡入
+        tl.fromTo('#hero-badge',
+            { y: -20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' },
+            '-=0.8',
         );
 
     }, 'Hero 动画');
@@ -143,7 +150,7 @@ export function initCardAnimations(): void {
             stagger: 0.2,
             ease: 'elastic.out(0.8, 0.4)',
             scrollTrigger: {
-                trigger: '#elastic-demo',
+                trigger: '#celestial-bodies',
                 start: 'top 75%',
                 toggleActions: 'play none none none',
             },

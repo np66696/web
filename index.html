@@ -3,109 +3,162 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>非线性动画演示</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>" />
+    <title>探索宇宙 · Cosmic Explorer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>" />
 </head>
-<body class="bg-gray-950 text-white overflow-x-hidden">
-    <!-- WebGL 背景 -->
+<body class="bg-[#020510] text-white overflow-x-hidden">
+    <!-- WebGL 星空背景 -->
     <div id="webgl-container" class="fixed inset-0 z-0"></div>
+    <!-- 星云光晕叠加层 -->
+    <div class="fixed inset-0 z-0 pointer-events-none opacity-30" style="background: radial-gradient(ellipse at 50% 0%, rgba(88,28,135,0.4) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(30,64,175,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(147,51,234,0.2) 0%, transparent 50%);"></div>
 
     <!-- 主内容区 -->
     <main class="relative z-10">
         <!-- 首屏 Hero -->
         <section id="hero" class="min-h-screen flex flex-col items-center justify-center text-center px-4">
-            <h1 id="hero-title" class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                非线性动画
-            </h1>
-            <p id="hero-subtitle" class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl">
-                由 GSAP + Three.js 驱动的弹性、回弹、缓动动画系统
-            </p>
-            <div id="hero-cta" class="flex gap-4">
-                <button id="btn-primary" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-semibold transition-colors duration-300">
-                    开始探索
-                </button>
-                <button id="btn-secondary" class="px-8 py-3 border border-gray-500 hover:border-white rounded-full font-semibold transition-all duration-300">
-                    了解更多
-                </button>
+            <!-- 装饰性星座连线 -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+                <svg class="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+                    <line x1="100" y1="200" x2="350" y2="150" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="350" y1="150" x2="500" y2="300" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="500" y1="300" x2="700" y2="180" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="700" y1="180" x2="900" y2="350" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="900" y1="350" x2="1100" y2="220" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="200" y1="500" x2="450" y2="420" stroke="#8b5cf6" stroke-width="0.5" />
+                    <line x1="450" y1="420" x2="600" y2="600" stroke="#8b5cf6" stroke-width="0.5" />
+                    <line x1="600" y1="600" x2="850" y2="480" stroke="#8b5cf6" stroke-width="0.5" />
+                    <circle cx="100" cy="200" r="2" fill="#6366f1" />
+                    <circle cx="350" cy="150" r="2" fill="#818cf8" />
+                    <circle cx="500" cy="300" r="2" fill="#6366f1" />
+                    <circle cx="700" cy="180" r="2" fill="#a78bfa" />
+                    <circle cx="900" cy="350" r="2" fill="#818cf8" />
+                    <circle cx="1100" cy="220" r="2" fill="#6366f1" />
+                    <circle cx="200" cy="500" r="2" fill="#8b5cf6" />
+                    <circle cx="450" cy="420" r="2" fill="#a78bfa" />
+                    <circle cx="600" cy="600" r="2" fill="#8b5cf6" />
+                    <circle cx="850" cy="480" r="2" fill="#c4b5fd" />
+                </svg>
             </div>
-            <div id="scroll-indicator" class="absolute bottom-10 animate-bounce">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <div class="relative z-10">
+                <div id="hero-badge" class="inline-block px-4 py-1.5 mb-8 rounded-full border border-indigo-500/30 bg-indigo-950/40 backdrop-blur-sm text-indigo-300 text-sm tracking-widest uppercase">
+                    ✦ 探索无垠宇宙 ✦
+                </div>
+                <h1 id="hero-title" class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight" style="background: linear-gradient(135deg, #e0e7ff 0%, #818cf8 25%, #a78bfa 50%, #6366f1 75%, #c4b5fd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    探索宇宙
+                </h1>
+                <p id="hero-subtitle" class="text-lg md:text-xl text-indigo-200/70 mb-10 max-w-xl mx-auto leading-relaxed">
+                    穿越星海，在粒子与星云之间<br/>感受宇宙的浩瀚与神秘
+                </p>
+                <div id="hero-cta" class="flex gap-4 justify-center">
+                    <button id="btn-primary" class="group relative px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-full font-semibold transition-all duration-500 overflow-hidden shadow-lg shadow-indigo-500/25 hover:shadow-indigo-400/50">
+                        <span class="relative z-10 flex items-center gap-2">
+                            🚀 开始星际之旅
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer bg-[length:200%_100%]"></div>
+                    </button>
+                    <button onclick="location.href='nasa.html'" id="btn-nasa" class="group relative px-8 py-3.5 rounded-full font-semibold transition-all duration-500 overflow-hidden border border-indigo-400/30 bg-indigo-950/30 backdrop-blur-sm hover:border-indigo-400/60 hover:bg-indigo-900/40">
+                        <span class="relative z-10 flex items-center gap-2 text-indigo-200 group-hover:text-white transition-colors">
+                            🔭 NASA 每日天文
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 滚动指示器 -->
+            <div id="scroll-indicator" class="absolute bottom-10 flex flex-col items-center gap-2 animate-float">
+                <span class="text-xs text-indigo-400/60 tracking-widest uppercase">探索更多</span>
+                <svg class="w-6 h-6 text-indigo-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
             </div>
         </section>
 
-        <!-- 弹性动画演示区 -->
-        <section id="elastic-demo" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
-            <h2 class="text-4xl font-bold mb-16">🎯 弹性缓动动画</h2>
+        <!-- 星体展示区 -->
+        <section id="celestial-bodies" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
+            <div class="text-center mb-16">
+                <span class="text-indigo-400/60 text-sm tracking-widest uppercase">Celestial Bodies</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3" style="background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">宇宙天体</h2>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full">
-                <div class="card bg-gray-900/80 backdrop-blur rounded-2xl p-8 border border-gray-800 hover:border-blue-500/50 transition-colors">
-                    <div class="card-icon text-5xl mb-4">🎪</div>
-                    <h3 class="text-xl font-bold mb-2">Elastic Out</h3>
-                    <p class="text-gray-400">弹性缓出，到达目标后回弹振荡</p>
+                <div class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-indigo-500/15 hover:border-indigo-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80">
+                    <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">🪐</div>
+                    <h3 class="text-xl font-bold mb-2 text-indigo-200">脉冲星</h3>
+                    <p class="text-indigo-300/50 text-sm leading-relaxed">高速旋转的中子星，以精确的周期释放电磁辐射脉冲</p>
                 </div>
-                <div class="card bg-gray-900/80 backdrop-blur rounded-2xl p-8 border border-gray-800 hover:border-purple-500/50 transition-colors">
-                    <div class="card-icon text-5xl mb-4">🎾</div>
-                    <h3 class="text-xl font-bold mb-2">Bounce</h3>
-                    <p class="text-gray-400">模拟物理弹跳，重力逐渐衰减</p>
+                <div class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-purple-500/15 hover:border-purple-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80">
+                    <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">🌌</div>
+                    <h3 class="text-xl font-bold mb-2 text-purple-200">星云</h3>
+                    <p class="text-purple-300/50 text-sm leading-relaxed">由尘埃、氢气与等离子体组成的星际云，恒星的诞生之地</p>
                 </div>
-                <div class="card bg-gray-900/80 backdrop-blur rounded-2xl p-8 border border-gray-800 hover:border-pink-500/50 transition-colors">
-                    <div class="card-icon text-5xl mb-4">↩️</div>
-                    <h3 class="text-xl font-bold mb-2">Back</h3>
-                    <p class="text-gray-400">过冲后退，产生回拉效果</p>
+                <div class="card bg-[#0a0520]/70 backdrop-blur-md rounded-2xl p-8 border border-violet-500/15 hover:border-violet-400/40 transition-all duration-500 group hover:bg-[#0d0828]/80">
+                    <div class="card-icon text-5xl mb-5 transition-transform duration-500 group-hover:scale-110">⚡</div>
+                    <h3 class="text-xl font-bold mb-2 text-violet-200">伽马射线暴</h3>
+                    <p class="text-violet-300/50 text-sm leading-relaxed">宇宙中最剧烈的爆炸，瞬间释放超越整个星系的能量</p>
                 </div>
             </div>
         </section>
 
-        <!-- 非线性滚动展示区 -->
-        <section id="scroll-demo" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
-            <h2 class="text-4xl font-bold mb-16">📜 非线性滚动动画</h2>
+        <!-- 星际航行展示区 -->
+        <section id="cosmic-journey" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
+            <div class="text-center mb-16">
+                <span class="text-indigo-400/60 text-sm tracking-widest uppercase">Cosmic Journey</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3" style="background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">星际航行</h2>
+            </div>
             <div class="parallax-layer space-y-32 max-w-4xl w-full">
                 <div class="scroll-item flex items-center gap-8">
-                    <div class="scroll-visual w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex-shrink-0"></div>
+                    <div class="scroll-visual w-32 h-32 rounded-2xl flex-shrink-0 flex items-center justify-center text-5xl bg-gradient-to-br from-indigo-900/60 to-purple-900/60 border border-indigo-500/20 shadow-lg shadow-indigo-500/10">🌍</div>
                     <div>
-                        <h3 class="text-2xl font-bold mb-2">视差滚动</h3>
-                        <p class="text-gray-400">不同元素以不同速率滚动，创造深度感</p>
+                        <h3 class="text-2xl font-bold mb-2 text-indigo-200">地球轨道</h3>
+                        <p class="text-indigo-300/50">我们星际旅程的起点，从这颗蓝色星球出发</p>
                     </div>
                 </div>
                 <div class="scroll-item flex items-center gap-8 flex-row-reverse text-right">
-                    <div class="scroll-visual w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex-shrink-0"></div>
+                    <div class="scroll-visual w-32 h-32 rounded-full flex-shrink-0 flex items-center justify-center text-5xl bg-gradient-to-br from-purple-900/60 to-pink-900/60 border border-purple-500/20 shadow-lg shadow-purple-500/10">✨</div>
                     <div>
-                        <h3 class="text-2xl font-bold mb-2">交错入场</h3>
-                        <p class="text-gray-400">元素以非线性间隔依次出现，制造节奏感</p>
+                        <h3 class="text-2xl font-bold mb-2 text-purple-200">穿越小行星带</h3>
+                        <p class="text-purple-300/50">穿越火星与木星之间数以万计的岩石碎片</p>
                     </div>
                 </div>
                 <div class="scroll-item flex items-center gap-8">
-                    <div class="scroll-visual w-32 h-32 bg-gradient-to-br from-pink-500 to-orange-500 rounded-2xl flex-shrink-0 rotate-45"></div>
+                    <div class="scroll-visual w-32 h-32 rounded-2xl flex-shrink-0 flex items-center justify-center text-5xl bg-gradient-to-br from-violet-900/60 to-indigo-900/60 border border-violet-500/20 shadow-lg shadow-violet-500/10 rotate-12">🌀</div>
                     <div>
-                        <h3 class="text-2xl font-bold mb-2">缩放渐变</h3>
-                        <p class="text-gray-400">滚动过程中元素非线性缩放与透明度变化</p>
+                        <h3 class="text-2xl font-bold mb-2 text-violet-200">银河系中心</h3>
+                        <p class="text-violet-300/50">抵达银河的心脏地带，感受超大质量黑洞的引力</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 交互演示区 -->
+        <!-- 交互探索区 -->
         <section id="interactive-demo" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
-            <h2 class="text-4xl font-bold mb-16">🎮 交互式非线性动画</h2>
+            <div class="text-center mb-16">
+                <span class="text-indigo-400/60 text-sm tracking-widest uppercase">Interactive Lab</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3" style="background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">交互实验室</h2>
+            </div>
             <div class="flex flex-wrap gap-8 justify-center max-w-3xl">
-                <div id="magnetic-btn" class="magnetic group relative w-40 h-40 bg-gray-800 rounded-3xl flex items-center justify-center cursor-pointer border border-gray-700 hover:border-blue-400 transition-colors">
-                    <span class="text-4xl group-hover:scale-125 transition-transform">🧲</span>
+                <div id="magnetic-btn" class="magnetic group relative w-44 h-44 bg-[#0a0520]/70 backdrop-blur-md rounded-3xl flex items-center justify-center cursor-pointer border border-indigo-500/20 hover:border-indigo-400/60 transition-all duration-300 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/20">
+                    <span class="text-5xl group-hover:scale-125 transition-transform duration-300">🌑</span>
                 </div>
-                <div id="spring-ball" class="w-40 h-40 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg shadow-blue-500/25">
-                    <span class="text-4xl">🏀</span>
+                <div id="spring-ball" class="w-44 h-44 bg-gradient-to-br from-indigo-500/80 via-purple-500/80 to-violet-600/80 rounded-full flex items-center justify-center cursor-pointer shadow-lg shadow-indigo-500/30 hover:shadow-indigo-400/50 transition-shadow duration-300 backdrop-blur-sm">
+                    <span class="text-5xl">⭐</span>
                 </div>
-                <div id="inertia-scroll" class="w-40 h-40 bg-gray-800 rounded-3xl flex items-center justify-center cursor-pointer border border-gray-700 overflow-hidden">
+                <div id="inertia-scroll" class="w-44 h-44 bg-[#0a0520]/70 backdrop-blur-md rounded-3xl flex items-center justify-center cursor-pointer border border-purple-500/20 hover:border-purple-400/60 transition-all duration-300 overflow-hidden shadow-lg shadow-purple-500/5 hover:shadow-purple-500/20">
                     <div class="inertia-content text-center p-4">
-                        <span class="text-4xl block mb-2">🎠</span>
-                        <span class="text-sm text-gray-400">惯性滚动</span>
+                        <span class="text-5xl block mb-2">☄️</span>
+                        <span class="text-xs text-indigo-400/60 tracking-wider">引力透镜</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <footer class="py-12 text-center text-gray-500">
-            <p>非线性动画系统 · GSAP + Three.js + TypeScript · Cloudflare 部署</p>
+        <!-- Footer -->
+        <footer class="relative py-16 text-center">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#020510] via-[#020510]/80 to-transparent pointer-events-none"></div>
+            <div class="relative z-10 space-y-3">
+                <p class="text-indigo-300/40 text-sm">🌌 宇宙探索系统 · GSAP + Three.js + TypeScript · Cloudflare</p>
+                <p class="text-indigo-300/25 text-xs">我们不过是宇宙中的一粒尘埃，却拥有仰望星空的勇气</p>
+            </div>
         </footer>
     </main>
 
