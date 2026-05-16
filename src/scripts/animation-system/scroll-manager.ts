@@ -150,6 +150,105 @@ export function initScrollProgressEffects(): void {
 }
 
 /**
+ * 初始化滚动进度条
+ */
+export function initScrollProgressBar(): void {
+    // 创建进度条元素
+    const progressBar = document.createElement('div');
+    progressBar.id = 'scroll-progress-bar';
+    document.body.appendChild(progressBar);
+
+    const updateProgress = () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+        progressBar.style.width = `${progress * 100}%`;
+        if (progress > 0.01) {
+            progressBar.style.opacity = '1';
+        } else {
+            progressBar.style.opacity = '0';
+        }
+    };
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+}
+
+/**
+ * 初始化 WebGL 背景滚动视差
+ * 随滚动微调 WebGL 容器位置，产生深度感
+ */
+export function initWebGLScrollParallax(): void {
+    const container = document.getElementById('webgl-container');
+    if (!container) return;
+
+    const updateParallax = () => {
+        const scrollY = window.scrollY;
+        const parallaxY = scrollY * 0.15;
+        container.style.transform = `translateY(${parallaxY}px)`;
+    };
+
+    window.addEventListener('scroll', updateParallax, { passive: true });
+}
+
+/**
+ * 初始化星云光晕滚动偏移
+ */
+export function initNebulaScrollShift(): void {
+    const nebulaOverlay = document.querySelector('.fixed.inset-0.z-0.pointer-events-none.opacity-30') as HTMLElement;
+    if (!nebulaOverlay) return;
+
+    const updateShift = () => {
+        const scrollY = window.scrollY;
+        const shiftX = Math.sin(scrollY * 0.0005) * 20;
+        const shiftY = scrollY * 0.08;
+        nebulaOverlay.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+    };
+
+    window.addEventListener('scroll', updateShift, { passive: true });
+}
+
+/**
+ * 初始化 Hero 区域滚动视差
+ * Hero 内各元素随滚动以不同速率移动
+ */
+export function initHeroScrollParallax(): void {
+    const heroTitle = document.getElementById('hero-title');
+    const heroSubtitle = document.getElementById('hero-subtitle');
+    const heroBadge = document.getElementById('hero-badge');
+    const heroCta = document.getElementById('hero-cta');
+    const scrollIndicator = document.getElementById('scroll-indicator');
+
+    const updateHeroParallax = () => {
+        const scrollY = window.scrollY;
+        const heroHeight = window.innerHeight;
+        const progress = Math.min(scrollY / heroHeight, 1);
+
+        if (heroTitle) {
+            heroTitle.style.transform = `translateY(${progress * -60}px) scale(${1 - progress * 0.15})`;
+            heroTitle.style.opacity = `${1 - progress * 1.2}`;
+        }
+        if (heroSubtitle) {
+            heroSubtitle.style.transform = `translateY(${progress * -40}px)`;
+            heroSubtitle.style.opacity = `${1 - progress * 1.5}`;
+        }
+        if (heroBadge) {
+            heroBadge.style.transform = `translateY(${progress * -20}px)`;
+            heroBadge.style.opacity = `${1 - progress * 1.8}`;
+        }
+        if (heroCta) {
+            heroCta.style.transform = `translateY(${progress * -30}px)`;
+            heroCta.style.opacity = `${1 - progress * 1.4}`;
+        }
+        if (scrollIndicator) {
+            scrollIndicator.style.opacity = `${1 - progress * 2}`;
+        }
+    };
+
+    window.addEventListener('scroll', updateHeroParallax, { passive: true });
+}
+
+/**
  * 初始化所有滚动相关动画
  */
 export function initAllScrollAnimations(): void {
@@ -157,6 +256,10 @@ export function initAllScrollAnimations(): void {
     initStaggerReveal();
     initScrollIndicator();
     initScrollProgressEffects();
+    initScrollProgressBar();
+    initWebGLScrollParallax();
+    initNebulaScrollShift();
+    initHeroScrollParallax();
 
     // 刷新 ScrollTrigger
     ScrollTrigger.refresh();

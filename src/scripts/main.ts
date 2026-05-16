@@ -3,6 +3,7 @@ import '../index.css';
 import { initWebGLBackground } from './animation-system/three-animations';
 import { initAllGSAPAnimations } from './animation-system/gsap-animations';
 import { initAllScrollAnimations } from './animation-system/scroll-manager';
+import { initPageTransitions } from './animation-system/page-transition';
 import { PerformanceMonitor } from '../utils/performance-monitor';
 
 /**
@@ -44,6 +45,10 @@ function initDOMAnimations(): void {
         initAllScrollAnimations();
         console.log('✅ 滚动动画初始化完成');
     }, '滚动动画初始化');
+
+    // 初始化页面过渡效果
+    initPageTransitions();
+    console.log('✅ 页面过渡动画就绪');
 
     console.log('✨ 所有非线性动画系统就绪！');
 }
