@@ -11,44 +11,81 @@
     <!-- WebGL 星空背景 -->
     <div id="webgl-container" class="fixed inset-0 z-0"></div>
     <!-- 星云光晕叠加层 -->
-    <div class="fixed inset-0 z-0 pointer-events-none opacity-25" style="background: radial-gradient(ellipse at 50% 30%, rgba(88,28,135,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(30,64,175,0.2) 0%, transparent 50%), radial-gradient(ellipse at 20% 50%, rgba(147,51,234,0.15) 0%, transparent 50%);"></div>
+    <div class="fixed inset-0 z-0 pointer-events-none opacity-30" style="background: radial-gradient(ellipse at 50% 0%, rgba(88,28,135,0.4) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(30,64,175,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(147,51,234,0.2) 0%, transparent 50%);"></div>
 
-    <!-- 主容器 -->
-    <div id="journey-app" class="relative z-10 h-full flex flex-col" style="background: radial-gradient(ellipse at center, #0a0520 0%, #020510 70%);">
-        <!-- 顶部导航栏 -->
-        <header class="relative z-20 flex items-center justify-between px-6 md:px-8 py-4 border-b border-indigo-500/10 shrink-0">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">🚀</span>
-                <span class="text-lg font-bold text-indigo-200 tracking-wide">🌌 群星 · Stellaris</span>
-            </div>
-            <a href="/" id="btn-back-home" class="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline">
-                <svg class="w-4 h-4 text-indigo-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    <!-- 主内容区 -->
+    <main class="relative z-10">
+        <!-- 首屏 Hero -->
+        <section id="hero" class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+            <!-- 装饰性星座连线 -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+                <svg class="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+                    <line x1="100" y1="200" x2="350" y2="150" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="350" y1="150" x2="500" y2="300" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="500" y1="300" x2="700" y2="180" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="700" y1="180" x2="900" y2="350" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="900" y1="350" x2="1100" y2="220" stroke="#6366f1" stroke-width="0.5" />
+                    <line x1="200" y1="500" x2="450" y2="420" stroke="#8b5cf6" stroke-width="0.5" />
+                    <line x1="450" y1="420" x2="600" y2="600" stroke="#8b5cf6" stroke-width="0.5" />
+                    <line x1="600" y1="600" x2="850" y2="480" stroke="#8b5cf6" stroke-width="0.5" />
+                    <circle cx="100" cy="200" r="2" fill="#6366f1" />
+                    <circle cx="350" cy="150" r="2" fill="#818cf8" />
+                    <circle cx="500" cy="300" r="2" fill="#6366f1" />
+                    <circle cx="700" cy="180" r="2" fill="#a78bfa" />
+                    <circle cx="900" cy="350" r="2" fill="#818cf8" />
+                    <circle cx="1100" cy="220" r="2" fill="#6366f1" />
+                    <circle cx="200" cy="500" r="2" fill="#8b5cf6" />
+                    <circle cx="450" cy="420" r="2" fill="#a78bfa" />
+                    <circle cx="600" cy="600" r="2" fill="#8b5cf6" />
+                    <circle cx="850" cy="480" r="2" fill="#c4b5fd" />
                 </svg>
-                <span class="text-indigo-300 group-hover:text-white transition-colors text-sm">返回地球</span>
-            </a>
-        </header>
+            </div>
 
-        <!-- 主内容区：双按钮 -->
-        <div class="flex-1 flex items-center justify-center relative z-10 min-h-0">
-            <div class="flex flex-col items-center gap-8 px-4">
-                <h2 class="text-2xl md:text-3xl font-bold text-indigo-200 tracking-wider text-center">🌌 群星 · Stellaris</h2>
-                <p class="text-indigo-400/50 text-sm tracking-widest">探索无尽的银河</p>
-                <div class="flex flex-col sm:flex-row gap-5 mt-4">
+            <div class="relative z-10">
+                <div class="inline-block px-4 py-1.5 mb-8 rounded-full border border-indigo-500/30 bg-indigo-950/40 backdrop-blur-sm text-indigo-300 text-sm tracking-widest uppercase">
+                    ✦ 征服星河 ✦
+                </div>
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight" style="background: linear-gradient(135deg, #e0e7ff 0%, #818cf8 25%, #a78bfa 50%, #6366f1 75%, #c4b5fd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    群星 · Stellaris
+                </h1>
+                <p class="text-lg md:text-xl text-indigo-200/70 mb-10 max-w-xl mx-auto leading-relaxed">
+                    在这片浩瀚银河中<br/>书写属于你的星际帝国传奇
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="https://qunxing.huijiwiki.com/" target="_blank" rel="noopener"
-                       class="group flex items-center gap-3 px-8 py-4 rounded-xl border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/25">
-                        <span class="text-2xl">📖</span>
-                        <span class="text-indigo-200 group-hover:text-white transition-colors text-base font-semibold tracking-wide">群星 WIKI</span>
+                       class="group relative px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-full font-semibold transition-all duration-500 overflow-hidden shadow-lg shadow-indigo-500/25 hover:shadow-indigo-400/50 no-underline">
+                        <span class="relative z-10 flex items-center gap-2 text-white">
+                            📖 群星 WIKI
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer bg-[length:200%_100%]"></div>
                     </a>
                     <a href="https://store.steampowered.com/app/281990/Stellaris/" target="_blank" rel="noopener"
-                       class="group flex items-center gap-3 px-8 py-4 rounded-xl border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/25">
-                        <span class="text-2xl">🛒</span>
-                        <span class="text-indigo-200 group-hover:text-white transition-colors text-base font-semibold tracking-wide">Steam 商店</span>
+                       class="group relative px-8 py-3.5 rounded-full font-semibold transition-all duration-500 overflow-hidden border border-indigo-400/30 bg-indigo-950/30 backdrop-blur-sm hover:border-indigo-400/60 hover:bg-indigo-900/40 no-underline">
+                        <span class="relative z-10 flex items-center gap-2 text-indigo-200 group-hover:text-white transition-colors">
+                            🛒 Steam 商店
+                        </span>
                     </a>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <!-- 滚动指示器 -->
+            <div class="absolute bottom-10 flex flex-col items-center gap-2 animate-float">
+                <span class="text-xs text-indigo-400/60 tracking-widest uppercase">向下滚动</span>
+                <svg class="w-6 h-6 text-indigo-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="relative py-16 text-center">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#020510] via-[#020510]/80 to-transparent pointer-events-none"></div>
+            <div class="relative z-10 space-y-3">
+                <p class="text-indigo-300/40 text-sm">🌌 群星导航站 · Stellaris Guide · Cloudflare</p>
+                <p class="text-indigo-300/25 text-xs">银河在上，愿群星指引你的道路</p>
+            </div>
+        </footer>
+    </main>
 
     <!-- 跃迁过渡层（返回首页时使用） -->
     <div id="cosmic-transition" style="display:none;">
