@@ -15,16 +15,19 @@
 
     <!-- 主内容区 -->
     <main class="relative z-10">
-        <!-- 返回主页按钮 -->
-        <a href="/" class="fixed top-6 left-6 z-50 group flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium tracking-wide transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-400/40 no-underline" title="返回主页">
-            <svg class="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span>返回主页</span>
-        </a>
+        <!-- 顶部横向导航栏 -->
+        <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-[#0a0520]/80 backdrop-blur-md border-b border-indigo-500/10">
+            <a href="/" class="group flex items-center gap-2 text-indigo-300 hover:text-white transition-colors duration-300 no-underline" title="返回主页">
+                <svg class="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide">返回主页</span>
+            </a>
+            <span class="text-xs text-indigo-400/40 tracking-widest">🌌 群星导航</span>
+        </nav>
 
         <!-- 首屏 Hero -->
-        <section id="hero" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pointer-events-none">
+        <section id="hero" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-14 pointer-events-none">
             <!-- 装饰性星座连线 -->
             <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                 <svg class="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
