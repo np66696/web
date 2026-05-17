@@ -84,6 +84,47 @@
             letter-spacing:.02em;
         }
 
+        /* ======== BACK BUTTON ======== */
+        .back-btn{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:10px 20px;
+            margin-bottom:20px;
+            border-radius:999px;
+            border:1px solid rgba(139,92,246,.25);
+            background:rgba(88,28,135,.2);
+            color:#c4b5fd;
+            font-size:.88rem;font-weight:600;
+            text-decoration:none;
+            backdrop-filter:blur(8px);
+            -webkit-backdrop-filter:blur(8px);
+            transition:all .35s cubic-bezier(.4,0,.2,1);
+            font-family:inherit;
+            letter-spacing:.03em;
+        }
+        .back-btn:hover{
+            background:rgba(139,92,246,.3);
+            border-color:rgba(167,139,250,.45);
+            color:#ede9fe;
+            box-shadow:0 0 28px rgba(139,92,246,.25);
+            transform:translateY(-1px);
+        }
+        .back-btn:focus-visible{
+            outline:2px solid #a78bfa;
+            outline-offset:3px;
+        }
+        .back-btn .arrow{
+            display:inline-block;
+            transition:transform .35s cubic-bezier(.4,0,.2,1);
+            font-size:1rem;
+        }
+        .back-btn:hover .arrow{
+            transform:translateX(-4px);
+        }
+        .back-btn .star{
+            font-size:.7rem;
+            opacity:.5;
+        }
+
         /* ======== LANGUAGE TOGGLE ======== */
         .lang-toggle{
             margin-top:18px;
@@ -406,6 +447,10 @@
     <!-- App shell -->
     <div class="app">
         <header class="header">
+            <a href="/" class="back-btn" title="返回主页">
+                <span class="arrow">◂</span> 返回主页
+                <span class="star">✦</span>
+            </a>
             <span class="header-icon" aria-hidden="true">🌌</span>
             <h1>Astronomy Picture of the Day</h1>
             <p class="subtitle">Explore the universe — one image at a time</p>
