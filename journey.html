@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>群星 · Stellaris</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://api.nasa.gov https://apod.nasa.gov https://www.youtube.com; connect-src 'self' https://api.nasa.gov https://static.cloudflareinsights.com; frame-src 'self' https://www.youtube.com; font-src 'self';" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>" />
+</head>
+<body class="bg-[#020510] text-white overflow-hidden h-screen">
+    <!-- WebGL 星空背景 -->
+    <div id="webgl-container" class="fixed inset-0 z-0"></div>
+    <!-- 星云光晕叠加层 -->
+    <div class="fixed inset-0 z-0 pointer-events-none opacity-25" style="background: radial-gradient(ellipse at 50% 30%, rgba(88,28,135,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(30,64,175,0.2) 0%, transparent 50%), radial-gradient(ellipse at 20% 50%, rgba(147,51,234,0.15) 0%, transparent 50%);"></div>
+
+    <!-- 主容器 -->
+    <div id="journey-app" class="relative z-10 h-full flex flex-col" style="background: radial-gradient(ellipse at center, #0a0520 0%, #020510 70%);">
+        <!-- 顶部导航栏 -->
+        <header class="relative z-20 flex items-center justify-between px-6 md:px-8 py-4 border-b border-indigo-500/10 shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🚀</span>
+                <span class="text-lg font-bold text-indigo-200 tracking-wide">🌌 群星 · Stellaris</span>
+            </div>
+            <a href="/" id="btn-back-home" class="group flex items-center gap-2 px-5 py-2.5 rounded-full border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline">
+                <svg class="w-4 h-4 text-indigo-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="text-indigo-300 group-hover:text-white transition-colors text-sm">返回地球</span>
+            </a>
+        </header>
+
+        <!-- 主内容区：双按钮 -->
+        <div class="flex-1 flex items-center justify-center relative z-10 min-h-0">
+            <div class="flex flex-col items-center gap-8 px-4">
+                <h2 class="text-2xl md:text-3xl font-bold text-indigo-200 tracking-wider text-center">🌌 群星 · Stellaris</h2>
+                <p class="text-indigo-400/50 text-sm tracking-widest">探索无尽的银河</p>
+                <div class="flex flex-col sm:flex-row gap-5 mt-4">
+                    <a href="https://qunxing.huijiwiki.com/" target="_blank" rel="noopener"
+                       class="group flex items-center gap-3 px-8 py-4 rounded-xl border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/25">
+                        <span class="text-2xl">📖</span>
+                        <span class="text-indigo-200 group-hover:text-white transition-colors text-base font-semibold tracking-wide">群星 WIKI</span>
+                    </a>
+                    <a href="https://store.steampowered.com/app/281990/Stellaris/" target="_blank" rel="noopener"
+                       class="group flex items-center gap-3 px-8 py-4 rounded-xl border border-indigo-400/25 bg-indigo-950/40 hover:bg-indigo-900/50 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm no-underline shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/25">
+                        <span class="text-2xl">🛒</span>
+                        <span class="text-indigo-200 group-hover:text-white transition-colors text-base font-semibold tracking-wide">Steam 商店</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 跃迁过渡层（返回首页时使用） -->
+    <div id="cosmic-transition" style="display:none;">
+        <div class="transition-warp-ring"></div>
+        <div class="transition-particle-field"></div>
+        <div class="transition-core"></div>
+        <div class="transition-spark-trail"></div>
+    </div>
+
+    <script type="module" src="/src/scripts/journey.ts"></script>
+</body>
+</html>

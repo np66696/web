@@ -1,16 +1,19 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
     build: {
         outDir: 'dist',
         emptyOutDir: true,
-        // 生产优化
         minify: 'esbuild',
         cssMinify: true,
-        // 资源内联阈值（<4KB 的 CSS/JS 内联到 HTML 减少请求）
         assetsInlineLimit: 4096,
-        // 代码分割
         rollupOptions: {
+            input: {
+                main: resolve(__dirname, 'index.html'),
+                nasa: resolve(__dirname, 'nasa.html'),
+                journey: resolve(__dirname, 'journey.html'),
+            },
             output: {
                 manualChunks: {
                     three: ['three'],

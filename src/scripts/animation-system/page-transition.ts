@@ -7,7 +7,7 @@ import gsap from 'gsap';
  */
 
 /** 允许的目标 URL 白名单 */
-const ALLOWED_TARGETS = ['/nasa.html', '/index.html', '/'];
+const ALLOWED_TARGETS = ['/nasa.html', '/journey.html', '/index.html', '/'];
 
 interface TransitionOptions {
     /** 过渡持续时间 (ms) */
@@ -185,17 +185,29 @@ export function executeCosmicTransition(
 }
 
 /**
- * 初始化页面过渡：拦截 NASA 按钮点击
+ * 初始化页面过渡：拦截 NASA 按钮和星际之旅按钮点击
  */
 export function initPageTransitions(): void {
     const nasaBtn = document.getElementById('btn-nasa');
-    if (!nasaBtn) return;
+    const journeyBtn = document.getElementById('btn-primary');
 
-    nasaBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        executeCosmicTransition(nasaBtn, {
-            targetUrl: '/nasa.html',
-            duration: 1200,
+    if (nasaBtn) {
+        nasaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            executeCosmicTransition(nasaBtn, {
+                targetUrl: '/nasa.html',
+                duration: 1200,
+            });
         });
-    });
+    }
+
+    if (journeyBtn) {
+        journeyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            executeCosmicTransition(journeyBtn, {
+                targetUrl: '/journey.html',
+                duration: 1000,
+            });
+        });
+    }
 }

@@ -198,6 +198,92 @@ html {
         radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
 }
 
+/* ========== 二级界面：星际航行控制台 ========== */
+#journey-panel {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#journey-panel.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 目的地卡片激活状态 */
+.destination-card.active {
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+/* 左栏/右栏入场动画初始状态 */
+#journey-left,
+#journey-right {
+    opacity: 0;
+}
+
+/* 星图行星悬停脉动 */
+.journey-planet {
+    transition: r 0.3s ease;
+    cursor: pointer;
+}
+.journey-planet:hover {
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* 飞船标记轨迹动画 */
+@keyframes shipPulse {
+    0%, 100% { opacity: 1; r: 3; }
+    50% { opacity: 0.3; r: 4; }
+}
+
+/* 启动按钮脉冲光环 */
+#btn-launch {
+    position: relative;
+    overflow: hidden;
+}
+#btn-launch::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #6366f1, #a855f7, #6366f1);
+    background-size: 200% 200%;
+    z-index: -1;
+    animation: launchGlow 3s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+#btn-launch:hover::after {
+    opacity: 1;
+}
+@keyframes launchGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* 控制台漂浮粒子动画 */
+@keyframes journeyFloat {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(20px, -30px) scale(1.5);
+    }
+    80% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-10px, -60px) scale(0.5);
+        opacity: 0;
+    }
+}
+
 /* ========== 滚动进度条 ========== */
 #scroll-progress-bar {
     position: fixed;
