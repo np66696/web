@@ -73,6 +73,43 @@ function playEntranceAnimation(): void {
 }
 
 /**
+ * 返回主页过渡动画
+ */
+function initBackTransition(): void {
+    const backLink = document.querySelector('a[href="/"]');
+    if (!backLink) return;
+
+    backLink.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const overlay = document.getElementById('cosmic-transition');
+        if (!overlay) {
+            window.location.href = '/';
+            return;
+        }
+
+        gsap.set(overlay, {
+            display: 'flex',
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            opacity: 0,
+            background: 'radial-gradient(circle at 50% 50%, rgba(2,5,16,0.98) 0%, rgba(5,10,30,0.95) 30%, rgba(10,15,50,0.8) 60%, rgba(20,30,80,0.3) 100%)',
+        });
+
+        const tl = gsap.timeline({
+            onComplete: () => { window.location.href = '/'; },
+        });
+
+        tl.to(overlay, { opacity: 1, duration: 0.3, ease: 'power2.in' });
+        tl.to(overlay, { opacity: 0, duration: 0.3, ease: 'power2.out' }, '+=0.15');
+    });
+}
+
+/**
  * 启动
  */
 async function bootstrap(): Promise<void> {
@@ -85,6 +122,9 @@ async function bootstrap(): Promise<void> {
     } catch (err) {
         console.warn('⚠️ WebGL 背景初始化失败:', err);
     }
+
+    // 返回主页过渡动画
+    initBackTransition();
 
     // 入场动画
     playEntranceAnimation();
