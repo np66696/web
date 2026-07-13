@@ -17,6 +17,6 @@
     "javascript": "javascriptreact",
     "typescript": "typescriptreact"
   },
-  "workbench.colorTheme": "Default Dark+",
+  "workbench.colorTheme": "Dark+",
   "liveServer.settings.port": 5500
 }
