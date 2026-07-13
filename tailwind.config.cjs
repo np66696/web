@@ -2,6 +2,7 @@ module.exports = {
     content: [
         './index.html',
         './nasa.html',
+        './journey.html',
         './src/**/*.{html,js,ts,css}',
     ],
     theme: {
