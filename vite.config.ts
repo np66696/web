@@ -21,6 +21,11 @@ export default defineConfig({
                 },
             },
         },
+        // 生产构建时移除所有 console 和 debugger 语句，防止信息泄露
+        esbuild: {
+            drop: ['console', 'debugger'],
+            legalComments: 'none',
+        },
     },
     server: {
         port: 3000,

@@ -627,6 +627,7 @@
             var controller = new AbortController();
             var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
 
+            // 注意: DEMO_KEY 每小时仅 30 次请求，生产环境建议去 https://api.nasa.gov 注册免费个人 API Key
             fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=6', {
                 signal: controller.signal,
                 referrerPolicy: 'no-referrer',
