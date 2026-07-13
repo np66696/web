@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>NASA APOD Explorer</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.nasa.gov https://static.cloudflareinsights.com; frame-src 'self' https://www.youtube.com; font-src 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.nasa.gov https://static.cloudflareinsights.com; frame-src 'self' https://www.youtube.com https://player.vimeo.com; font-src 'self';" />
     <style>
         /* ======== RESET & BASE ======== */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -349,6 +349,18 @@
             object-fit:contain;border-radius:12px;
             box-shadow:0 0 80px rgba(139,92,246,.08);
         }
+        .lightbox-video{
+            width:min(100%,900px);aspect-ratio:16/9;
+            border:0;border-radius:12px;
+            box-shadow:0 0 80px rgba(139,92,246,.08);
+        }
+        .media-fallback{
+            height:100%;min-height:180px;display:flex;
+            align-items:center;justify-content:center;
+            background:linear-gradient(135deg,#161036,#080718);
+            color:#c4b5fd;font-size:2.5rem;
+        }
+        .media-fallback span{font-size:.8rem;margin-left:10px;color:#a78bfa}
         .lightbox-info{
             text-align:center;margin-top:22px;
             max-width:680px;
@@ -498,6 +510,8 @@
             <button class="lightbox-close" id="lightbox-close" aria-label="Close detail view">✕</button>
             <div class="lightbox-content">
                 <img id="lightbox-img" src="" alt="" />
+                <iframe id="lightbox-video" class="lightbox-video" title="NASA video" hidden
+                    allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
                 <div class="lightbox-info">
                     <h2 id="lightbox-title"></h2>
                     <p class="date" id="lightbox-date"></p>
@@ -633,6 +647,7 @@
         var nextBtn  = document.getElementById('carousel-next');
         var lightbox       = document.getElementById('lightbox');
         var lightboxImg    = document.getElementById('lightbox-img');
+        var lightboxVideo  = document.getElementById('lightbox-video');
         var lightboxTitle  = document.getElementById('lightbox-title');
         var lightboxDate   = document.getElementById('lightbox-date');
         var lightboxExplanation = document.getElementById('lightbox-explanation');
@@ -651,8 +666,8 @@
         function preloadFirstImages(data, count){
             count = Math.min(count || 2, data.length);
             for(var i = 0; i < count; i++){
-                var src = data[i].hdurl || data[i].url;
-                if(/youtube\.com|youtu\.be|vimeo\.com/i.test(src)) continue;
+                var src = getMediaSource(data[i]);
+                if(!src || /youtube\.com|youtu\.be|vimeo\.com/i.test(src)) continue;
                 var link = document.createElement('link');
                 link.rel = 'preload';
                 link.as = 'image';
@@ -672,7 +687,7 @@
             var controller = new AbortController();
             var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
 
-            fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=6', {
+            fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&count=6&thumbs=true', {
                 signal: controller.signal,
                 referrerPolicy: 'no-referrer',
             })
@@ -687,9 +702,6 @@
                     // 立即渲染（不等图片加载），预加载前 2 张可见图
                     render();
                     preloadFirstImages(apodData, 2);
-                })
-                .then(function(){
-                    render();
                 })
                 .catch(function(err){
                     clearTimeout(timeoutId);
@@ -712,7 +724,7 @@
         function buildGrid(){
             gridEl.innerHTML = '';
             apodData.forEach(function(item, i){
-                var src = item.hdurl || item.url;
+                var src = getMediaSource(item);
                 var card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('tabindex', '0');
@@ -720,7 +732,7 @@
                 card.setAttribute('aria-label', t('viewItem') + item.title);
                 card.innerHTML =
                     '<div class="card-image-wrap">' +
-                        '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" loading="lazy" decoding="async"' + (i < 2 ? ' fetchpriority="high"' : '') + ' />' +
+                        renderMediaPreview(item, i < 2) +
                     '</div>' +
                     '<div class="card-body">' +
                         '<p class="date">' + esc(item.date) + '</p>' +
@@ -746,12 +758,11 @@
             slideIndex = 0;
 
             apodData.forEach(function(item, i){
-                var src = item.hdurl || item.url;
                 var slide = document.createElement('div');
                 slide.className = 'carousel-slide';
                 slide.setAttribute('draggable', 'false');
                 slide.innerHTML =
-                    '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" draggable="false" decoding="async" loading="lazy" />' +
+                    renderMediaPreview(item, false, true) +
                     '<div class="carousel-slide-caption">' +
                         '<h3>' + esc(item.title) + '</h3>' +
                         '<p class="date">' + esc(item.date) + '</p>' +
@@ -868,8 +879,16 @@
         /* ========== LIGHTBOX ========== */
         function openLightbox(idx){
             var item = apodData[idx];
-            lightboxImg.src = item.hdurl || item.url;
-            lightboxImg.alt = item.title;
+            var isVideo = item.media_type === 'video';
+            lightboxImg.hidden = isVideo;
+            lightboxVideo.hidden = !isVideo;
+            if(isVideo){
+                lightboxVideo.src = getVideoEmbedUrl(item.url);
+                lightboxVideo.title = item.title;
+            } else {
+                lightboxImg.src = getMediaSource(item);
+                lightboxImg.alt = item.title;
+            }
             lightboxTitle.textContent = item.title;
             lightboxDate.textContent = item.date;
             lightboxExplanation.textContent = item.explanation || '';
@@ -882,6 +901,7 @@
             lightbox.classList.remove('open');
             document.body.style.overflow = '';
             lightboxImg.src = '';
+            lightboxVideo.src = '';
             if(document.activeElement) document.activeElement.blur();
         }
 
@@ -912,6 +932,34 @@
 
         /* ========== UTILS ========== */
         var escCache = Object.create(null);
+        function getMediaSource(item){
+            return item.media_type === 'video' ? (item.thumbnail_url || '') : (item.hdurl || item.url || '');
+        }
+        function getVideoEmbedUrl(url){
+            try {
+                var parsed = new URL(url);
+                if(/(^|\.)youtu\.be$/i.test(parsed.hostname)){
+                    return 'https://www.youtube.com/embed' + parsed.pathname;
+                }
+                if(/(^|\.)youtube\.com$/i.test(parsed.hostname) && parsed.pathname === '/watch'){
+                    return 'https://www.youtube.com/embed/' + parsed.searchParams.get('v');
+                }
+                if(/(^|\.)vimeo\.com$/i.test(parsed.hostname) && !/^player\./i.test(parsed.hostname)){
+                    return 'https://player.vimeo.com/video' + parsed.pathname;
+                }
+            } catch(err) {
+                console.warn('Invalid NASA video URL:', err);
+            }
+            return url;
+        }
+        function renderMediaPreview(item, highPriority, draggable){
+            var src = getMediaSource(item);
+            if(!src){
+                return '<div class="media-fallback" role="img" aria-label="' + esc(item.title) + '">🎬<span>Video</span></div>';
+            }
+            return '<img src="' + esc(src) + '" alt="' + esc(item.title) + '" loading="lazy" decoding="async"' +
+                (highPriority ? ' fetchpriority="high"' : '') + (draggable ? ' draggable="false"' : '') + ' />';
+        }
         function esc(str){
             if(str == null) return '';
             var s = '' + str;
