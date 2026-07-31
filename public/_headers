@@ -4,17 +4,10 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
-  X-XSS-Protection: 1; mode=block
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
-# 静态资源长期缓存
+# 静态资源长期缓存（所有 JS/CSS/图片均带 content-hash，位于 /assets/ 下）
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# JavaScript / CSS 文件
-*.js
-  Cache-Control: public, max-age=31536000, immutable
-*.css
   Cache-Control: public, max-age=31536000, immutable
 
 # HTML 不缓存（确保更新即时生效）

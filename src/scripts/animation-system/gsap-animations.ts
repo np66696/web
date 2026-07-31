@@ -7,89 +7,6 @@ import { PerformanceMonitor } from '../../utils/performance-monitor';
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * 非线性缓动函数集合
- * 这些函数产生比标准 CSS easing 更丰富的动画效果
- */
-export const EasingFunctions = {
-    /** 弹性缓出 - 到达终点后振荡回弹 */
-    elasticOut: (t: number): number => {
-        if (t === 0 || t === 1) return t;
-        return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
-    },
-
-    /** 弹性缓入 - 从起点开始振荡加速 */
-    elasticIn: (t: number): number => {
-        if (t === 0 || t === 1) return t;
-        return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * (2 * Math.PI) / 0.3));
-    },
-
-    /** 弹性缓入缓出 */
-    elasticInOut: (t: number): number => {
-        if (t === 0 || t === 1) return t;
-        if (t < 0.5) {
-            return -0.5 * (Math.pow(2, 10 * (t * 2 - 1)) * Math.sin((t * 2 - 1.075) * (2 * Math.PI) / 0.3));
-        }
-        return 0.5 * Math.pow(2, -10 * (t * 2 - 1)) * Math.sin((t * 2 - 1.075) * (2 * Math.PI) / 0.3) + 1;
-    },
-
-    /** 弹跳缓出 - 模拟物理弹跳 */
-    bounceOut: (t: number): number => {
-        const n1 = 7.5625;
-        const d1 = 2.75;
-        if (t < 1 / d1) {
-            return n1 * t * t;
-        } else if (t < 2 / d1) {
-            return n1 * (t -= 1.5 / d1) * t + 0.75;
-        } else if (t < 2.5 / d1) {
-            return n1 * (t -= 2.25 / d1) * t + 0.9375;
-        }
-        return n1 * (t -= 2.625 / d1) * t + 0.984375;
-    },
-
-    /** 回退缓出 - 过冲后回退 */
-    backOut: (t: number): number => {
-        const c1 = 1.70158;
-        const c3 = c1 + 1;
-        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-    },
-
-    /** 回退缓入 */
-    backIn: (t: number): number => {
-        const c1 = 1.70158;
-        const c3 = c1 + 1;
-        return c3 * t * t * t - c1 * t * t;
-    },
-
-    /** 正弦波调制 - 用于创建波浪感 */
-    sineWave: (t: number, frequency: number = 3, amplitude: number = 0.1): number => {
-        return t + Math.sin(t * Math.PI * 2 * frequency) * amplitude * (1 - t);
-    },
-};
-
-/**
- * 使用自定义非线性缓动函数执行动画
- * @param callback 每帧回调，接收 0-1 的进度值
- * @param duration 持续时间 (ms)
- * @param easing 缓动函数
- */
-export function animateWithCustomEasing(
-    callback: (progress: number) => void,
-    duration: number,
-    easing: (t: number) => number = EasingFunctions.elasticOut
-): gsap.core.Tween {
-    const obj = { t: 0 };
-    return gsap.to(obj, {
-        t: 1,
-        duration: duration / 1000,
-        ease: 'none',
-        onUpdate: () => {
-            const easedProgress = easing(obj.t);
-            callback(easedProgress);
-        },
-    });
-}
-
-/**
  * 初始化 Hero 区域非线性入场动画
  */
 export function initHeroAnimations(): void {
@@ -165,30 +82,23 @@ export function initMagneticButton(): void {
     const btn = document.getElementById('magnetic-btn');
     if (!btn) return;
 
+    // quickTo: 预创建缓动，mousemove 时仅更新目标值，避免每像素新建 tween
+    const quickX = gsap.quickTo(btn, 'x', { duration: 0.3, ease: 'power2.out' });
+    const quickY = gsap.quickTo(btn, 'y', { duration: 0.3, ease: 'power2.out' });
+
     const magnetize = (e: MouseEvent) => {
-        const rect = btn!.getBoundingClientRect();
+        const rect = btn.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
         // 非线性映射：距离越近移动越大
-        const deltaX = (e.clientX - centerX) * 0.3;
-        const deltaY = (e.clientY - centerY) * 0.3;
-
-        gsap.to(btn, {
-            x: deltaX,
-            y: deltaY,
-            duration: 0.3,
-            ease: 'power2.out',
-        });
+        quickX((e.clientX - centerX) * 0.3);
+        quickY((e.clientY - centerY) * 0.3);
     };
 
     const demagnetize = () => {
-        gsap.to(btn, {
-            x: 0,
-            y: 0,
-            duration: 0.6,
-            ease: 'elastic.out(1, 0.3)',
-        });
+        quickX(0);
+        quickY(0);
     };
 
     btn.addEventListener('mousemove', magnetize);
@@ -201,6 +111,14 @@ export function initMagneticButton(): void {
 export function initSpringBall(): void {
     const ball = document.getElementById('spring-ball');
     if (!ball) return;
+
+    // 复用单个 ripple 元素，避免每次点击创建 + 销毁 DOM
+    const ripple = document.createElement('div');
+    ripple.className = 'spring-ripple';
+    ripple.style.cssText = 'position:absolute;inset:0;border-radius:50%;pointer-events:none;';
+    ball.style.position = 'relative';
+    ball.style.overflow = 'visible';
+    ball.appendChild(ripple);
 
     ball.addEventListener('click', () => {
         // 非线性缩小再弹回
@@ -222,13 +140,6 @@ export function initSpringBall(): void {
         });
 
         // 同时产生波纹
-        const ripple = document.createElement('div');
-        ripple.className = 'absolute inset-0 rounded-full bg-blue-400/30';
-        ripple.style.cssText = 'position:absolute;inset:0;border-radius:50%;';
-        ball.style.position = 'relative';
-        ball.style.overflow = 'visible';
-        ball.appendChild(ripple);
-
         gsap.fromTo(ripple, {
             scale: 0.8,
             opacity: 0.8,
@@ -237,7 +148,6 @@ export function initSpringBall(): void {
             opacity: 0,
             duration: 0.8,
             ease: 'power3.out',
-            onComplete: () => ripple.remove(),
         });
     });
 }
@@ -251,7 +161,7 @@ export function initInertiaScroll(): void {
     if (!container || !content) return;
 
     let velocity = 0;
-    let animationId: number | null = null;
+    let animating = false;
 
     const applyInertia = () => {
         // 非线性衰减：使用指数衰减
@@ -268,25 +178,27 @@ export function initInertiaScroll(): void {
 
         gsap.set(content, { y: Math.max(-maxScroll, Math.min(maxScroll, newY)) });
 
-        if (Math.abs(velocity) > 0.1) {
-            animationId = requestAnimationFrame(applyInertia);
-        } else {
-            // 弹回原位
+        if (Math.abs(velocity) <= 0.1) {
+            // 停止惯性，弹回原位，并从 ticker 中移除自身
+            animating = false;
+            gsap.ticker.remove(applyInertia);
             gsap.to(content, {
                 y: 0,
                 duration: 0.8,
                 ease: 'elastic.out(0.6, 0.3)',
             });
-            animationId = null;
         }
     };
 
+    // 使用 GSAP 的 ticker 替代手写 requestAnimationFrame，
+    // 由 GSAP 统一调度，避免混用两套循环
     container.addEventListener('wheel', (e) => {
         e.preventDefault();
         velocity += e.deltaY * 0.15;
 
-        if (!animationId) {
-            animationId = requestAnimationFrame(applyInertia);
+        if (!animating) {
+            animating = true;
+            gsap.ticker.add(applyInertia);
         }
     }, { passive: false });
 }

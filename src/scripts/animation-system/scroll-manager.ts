@@ -2,7 +2,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger 已在 gsap-animations.ts 中注册，避免重复注册
 
 // ============ 统一滚动事件总线 (单次 RAF，避免多个 scroll listener 造成布局抖动) ============
 type ScrollCallback = (scrollY: number, progress: number) => void;
@@ -143,7 +143,8 @@ export function initWebGLScrollParallax(): void {
  * 星云光晕偏移（合并到统一 RAF）
  */
 export function initNebulaScrollShift(): void {
-    const nebulaOverlay = document.querySelector('.fixed.inset-0.z-0.pointer-events-none.opacity-30') as HTMLElement;
+    // 通过 id 定位，避免依赖具体 class 组合（class 变更会静默失效）
+    const nebulaOverlay = document.getElementById('nebula-overlay') as HTMLElement | null;
     if (!nebulaOverlay) return;
     registerScrollEffect((scrollY) => {
         const shiftX = Math.sin(scrollY * 0.0005) * 20;

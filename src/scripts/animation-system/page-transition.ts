@@ -38,9 +38,11 @@ function createTransitionOverlay(): HTMLElement {
 
 /**
  * 创建粒子场（小型星光粒子）
+ * 每次调用前清空旧粒子，避免 DOM 无限累积
  */
 function spawnParticles(container: HTMLElement): void {
     const particleField = container.querySelector('.transition-particle-field')!;
+    particleField.innerHTML = ''; // 清空上一次过渡残留的粒子
     const count = 40;
 
     for (let i = 0; i < count; i++) {
@@ -62,6 +64,9 @@ function spawnParticles(container: HTMLElement): void {
     }
 }
 
+// 并发守卫：过渡进行中时忽略重复触发
+let isTransitioning = false;
+
 /**
  * 执行宇宙跃迁过渡动画
  * @param sourceElement 点击的源元素（用于计算动画起点）
@@ -71,6 +76,9 @@ export function executeCosmicTransition(
     sourceElement: HTMLElement,
     options: TransitionOptions = {}
 ): void {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
     const {
         duration = 1200,
         targetUrl = '/nasa.html',
@@ -112,10 +120,16 @@ export function executeCosmicTransition(
     // 时间线编排
     const safeUrl = ALLOWED_TARGETS.includes(targetUrl) ? targetUrl : '/';
     let navigated = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
 
     const doNavigate = () => {
         if (navigated) return;
         navigated = true;
+        // 兜底 timer 已触发则无需清理；若 GSAP onComplete 先触发，则取消兜底
+        if (fallbackTimer !== null) {
+            clearTimeout(fallbackTimer);
+            fallbackTimer = null;
+        }
         window.location.href = safeUrl;
     };
 
@@ -124,7 +138,7 @@ export function executeCosmicTransition(
     });
 
     // 安全兜底：即使 GSAP 回调失败，也确保在 duration+500ms 后导航
-    setTimeout(doNavigate, duration + 500);
+    fallbackTimer = setTimeout(doNavigate, duration + 500);
 
     // 阶段1：虫洞入口 — 暗色覆盖层从按钮位置扩散
     tl.to(overlay, {

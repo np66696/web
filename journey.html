@@ -4,14 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>群星 · Stellaris</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://api.nasa.gov https://apod.nasa.gov https://www.youtube.com; connect-src 'self' https://api.nasa.gov https://static.cloudflareinsights.com; frame-src 'self' https://www.youtube.com; font-src 'self'; object-src 'none'; base-uri 'self';" />
+    <meta name="description" content="在这片浩瀚银河中书写属于你的星际帝国传奇。Stellaris 群星游戏导航站 — WIKI 与 Steam 商店入口。" />
+    <meta property="og:title" content="群星 · Stellaris" />
+    <meta property="og:description" content="在这片浩瀚银河中书写属于你的星际帝国传奇。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://apod.nasa.gov/apod/calendar/S_240629.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="群星 · Stellaris" />
+    <meta name="twitter:description" content="在这片浩瀚银河中书写属于你的星际帝国传奇。" />
+    
+    <meta name="theme-color" content="#020510" />
+    <link rel="canonical" href="/journey.html" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://api.nasa.gov https://apod.nasa.gov https://www.youtube.com; connect-src 'self' https://api.nasa.gov https://static.cloudflareinsights.com; frame-src 'self' https://www.youtube.com; font-src 'self'; object-src 'none'; base-uri 'self';" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>" />
 </head>
 <body class="bg-[#020510] text-white overflow-hidden h-screen">
     <!-- WebGL 星空背景 -->
     <div id="webgl-container" class="fixed inset-0 z-0"></div>
     <!-- 星云光晕叠加层 -->
-    <div class="fixed inset-0 z-0 pointer-events-none opacity-30" style="background: radial-gradient(ellipse at 50% 0%, rgba(88,28,135,0.4) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(30,64,175,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(147,51,234,0.2) 0%, transparent 50%);"></div>
+    <div id="nebula-overlay" class="fixed inset-0 z-0 pointer-events-none opacity-30" style="background: radial-gradient(ellipse at 50% 0%, rgba(88,28,135,0.4) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(30,64,175,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(147,51,234,0.2) 0%, transparent 50%);"></div>
 
     <!-- 主内容区 -->
     <main class="relative z-10">
@@ -60,14 +71,14 @@
                     在这片浩瀚银河中<br/>书写属于你的星际帝国传奇
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="https://qunxing.huijiwiki.com/" target="_blank" rel="noopener"
+                    <a href="https://qunxing.huijiwiki.com/" target="_blank" rel="noopener" data-link-type="wiki"
                        class="group relative px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-full font-semibold transition-all duration-500 overflow-hidden shadow-lg shadow-indigo-500/25 hover:shadow-indigo-400/50 no-underline">
                         <span class="relative z-10 flex items-center gap-2 text-white">
                             📖 群星 WIKI
                         </span>
                         <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer bg-[length:200%_100%]"></div>
                     </a>
-                    <a href="https://store.steampowered.com/app/281990/Stellaris/" target="_blank" rel="noopener"
+                    <a href="https://store.steampowered.com/app/281990/Stellaris/" target="_blank" rel="noopener" data-link-type="steam"
                        class="group relative px-8 py-3.5 rounded-full font-semibold transition-all duration-500 overflow-hidden border border-indigo-400/30 bg-indigo-950/30 backdrop-blur-sm hover:border-indigo-400/60 hover:bg-indigo-900/40 no-underline">
                         <span class="relative z-10 flex items-center gap-2 text-indigo-200 group-hover:text-white transition-colors">
                             🛒 Steam 商店

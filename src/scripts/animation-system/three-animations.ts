@@ -1,5 +1,21 @@
 // src/scripts/animation-system/three-animations.ts
-import * as THREE from 'three';
+import {
+    Scene,
+    PerspectiveCamera,
+    WebGLRenderer,
+    Group,
+    Points,
+    PointsMaterial,
+    BufferGeometry,
+    BufferAttribute,
+    Color,
+    Mesh,
+    MeshBasicMaterial,
+    SphereGeometry,
+    AdditiveBlending,
+    CanvasTexture,
+    Texture,
+} from 'three';
 
 /**
  * 星空颜色调色板 - 模拟真实恒星色温
@@ -22,20 +38,35 @@ const NEBULA_COLORS = [
     0x3b82f6, // 蓝色
 ];
 
+interface StarLayerConfig {
+    count: number;
+    minSize: number;
+    maxSize: number;
+    minDist: number;
+    maxDist: number;
+    minOp: number;
+    maxOp: number;
+}
+
 interface StarLayer {
-    points: THREE.Points;
-    twinkleData: Float32Array; // 每个粒子的闪烁参数: [speed, offset, baseOpacity, minOpacity, maxOpacity, _, _]
+    points: Points;
+    twinkleData: Float32Array; // 每个粒子的闪烁参数: [speed, offset, minOpacity, maxOpacity]
+    opacities: Float32Array;   // 预分配的工作数组，避免每帧分配
     baseSizes: Float32Array;
 }
 
 // 全局引用，用于清理
-let rendererRef: THREE.WebGLRenderer | null = null;
+let rendererRef: WebGLRenderer | null = null;
 let animFrameId: number | null = null;
+let cleanupRefs: Array<() => void> = [];
 
-/**
- * 生成圆形渐变纹理（用于 PointsMaterial 精灵）
- */
-function createGlowTexture(color: string, size: number = 64): THREE.Texture {
+// 纹理缓存：相同参数的发光纹理只创建一次，多处共享
+const glowTextureCache = new Map<string, Texture>();
+function createGlowTexture(color: string, size: number = 64): Texture {
+    const cacheKey = `${color}|${size}`;
+    const cached = glowTextureCache.get(cacheKey);
+    if (cached) return cached;
+
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -47,8 +78,9 @@ function createGlowTexture(color: string, size: number = 64): THREE.Texture {
     gradient.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, size, size);
-    const texture = new THREE.CanvasTexture(canvas);
+    const texture = new CanvasTexture(canvas);
     texture.needsUpdate = true;
+    glowTextureCache.set(cacheKey, texture);
     return texture;
 }
 
@@ -60,19 +92,19 @@ export async function initWebGLBackground(): Promise<void> {
     if (!container) return;
 
     // === 场景 & 相机 ===
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 15;
 
     // === 渲染器 ===
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    const renderer = new WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
     rendererRef = renderer;
 
     // === 星空粒子层 (4 层，每层 1 次 draw call) ===
-    const starGroup = new THREE.Group();
+    const starGroup = new Group();
     const starLayers = createStarPointLayers(starGroup);
     scene.add(starGroup);
 
@@ -106,6 +138,16 @@ export async function initWebGLBackground(): Promise<void> {
     };
     window.addEventListener('resize', onResize);
 
+    // 记录清理函数，供 disposeWebGLBackground 调用
+    cleanupRefs.push(
+        () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('resize', onResize);
+            clearTimeout(resizeTimeout);
+        },
+        () => disposeScene(scene, glowTextureCache),
+    );
+
     // === 动画循环 ===
     function animate() {
         animFrameId = requestAnimationFrame(animate);
@@ -130,7 +172,7 @@ export async function initWebGLBackground(): Promise<void> {
         // 中心光晕脉冲
         const pulse = 1 + Math.sin(time * 0.5) * 0.15;
         glowSphere.scale.setScalar(pulse);
-        (glowSphere.material as THREE.MeshBasicMaterial).opacity = 0.12 + Math.sin(time * 0.7) * 0.05;
+        (glowSphere.material as MeshBasicMaterial).opacity = 0.12 + Math.sin(time * 0.7) * 0.05;
 
         renderer.render(scene, camera);
     }
@@ -141,8 +183,8 @@ export async function initWebGLBackground(): Promise<void> {
 /**
  * 创建多层星空 Points（每层单个 draw call，4 层代替 ~800 次 draw call）
  */
-function createStarPointLayers(group: THREE.Group): StarLayer[] {
-    const layers: StarLayer[] = [
+function createStarPointLayers(group: Group): StarLayer[] {
+    const layers: StarLayerConfig[] = [
         { count: 80,  minSize: 0.025, maxSize: 0.035, minDist: 4,  maxDist: 6,  minOp: 0.4,  maxOp: 0.8  },
         { count: 200, minSize: 0.012, maxSize: 0.02,  minDist: 6,  maxDist: 9,  minOp: 0.25, maxOp: 0.55 },
         { count: 400, minSize: 0.006, maxSize: 0.012, minDist: 8,  maxDist: 14, minOp: 0.12, maxOp: 0.3  },
@@ -166,7 +208,7 @@ function createStarPointLayers(group: THREE.Group): StarLayer[] {
             positions[i * 3 + 2] = radius * Math.cos(phi);
 
             // 颜色
-            const color = new THREE.Color(STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)]);
+            const color = new Color(STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)]);
             colors[i * 3] = color.r;
             colors[i * 3 + 1] = color.g;
             colors[i * 3 + 2] = color.b;
@@ -181,35 +223,36 @@ function createStarPointLayers(group: THREE.Group): StarLayer[] {
             twinkleData[i * 4 + 3] = cfg.maxOp;                   // maxOpacity
         }
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        const geometry = new BufferGeometry();
+        geometry.setAttribute('position', new BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new BufferAttribute(sizes, 1));
 
-        const material = new THREE.PointsMaterial({
+        const material = new PointsMaterial({
             size: 0.08,
             vertexColors: true,
-            blending: THREE.AdditiveBlending,
+            blending: AdditiveBlending,
             depthWrite: false,
             transparent: true,
             opacity: 0.7,
             map: createGlowTexture('rgba(255,255,255,1)', 32),
         });
 
-        const points = new THREE.Points(geometry, material);
+        const points = new Points(geometry, material);
         group.add(points);
 
-        return { points, twinkleData, baseSizes: sizes };
+        return { points, twinkleData, opacities: new Float32Array(count), baseSizes: sizes };
     });
 }
 
 /**
  * 更新星空闪烁 - 操作 buffer attribute 比遍历 mesh.children 快 10x+
+ * 复用预分配的 opacities 数组，避免每帧产生 GC 压力
  */
 function updateStarPointTwinkle(layers: StarLayer[], time: number) {
     for (const layer of layers) {
         const count = layer.twinkleData.length / 4;
-        const opacities = new Float32Array(count);
+        const opacities = layer.opacities;
 
         for (let i = 0; i < count; i++) {
             const speed = layer.twinkleData[i * 4];
@@ -229,15 +272,16 @@ function updateStarPointTwinkle(layers: StarLayer[], time: number) {
         // 对于更精细的逐粒子不透明度，可使用 ShaderMaterial
         let sum = 0;
         for (let i = 0; i < count; i++) sum += opacities[i];
-        (layer.points.material as THREE.PointsMaterial).opacity = sum / count * 1.5;
-        layer.points.material.needsUpdate = true;
+        const material = layer.points.material as PointsMaterial;
+        material.opacity = sum / count * 1.5;
+        material.needsUpdate = true;
     }
 }
 
 /**
  * 创建星云粒子云（Points 版本）
  */
-function createNebulaPoints(): THREE.Points {
+function createNebulaPoints(): Points {
     const count = 60;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -250,52 +294,88 @@ function createNebulaPoints(): THREE.Points {
         positions[i * 3 + 1] = Math.sin(clusterAngle) * clusterRadius + spread * 0.7;
         positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
 
-        const color = new THREE.Color(NEBULA_COLORS[Math.floor(Math.random() * NEBULA_COLORS.length)]);
+        const color = new Color(NEBULA_COLORS[Math.floor(Math.random() * NEBULA_COLORS.length)]);
         colors[i * 3] = color.r;
         colors[i * 3 + 1] = color.g;
         colors[i * 3 + 2] = color.b;
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new BufferAttribute(colors, 3));
 
-    const material = new THREE.PointsMaterial({
+    const material = new PointsMaterial({
         size: 0.6,
         vertexColors: true,
-        blending: THREE.AdditiveBlending,
+        blending: AdditiveBlending,
         depthWrite: false,
         transparent: true,
         opacity: 0.06,
         map: createGlowTexture('rgba(255,255,255,0.5)', 64),
     });
 
-    return new THREE.Points(geometry, material);
+    return new Points(geometry, material);
 }
 
 /**
  * 创建中心光晕
  */
-function createCentralGlow(): THREE.Mesh {
-    const geometry = new THREE.SphereGeometry(3, 32, 32);
-    const material = new THREE.MeshBasicMaterial({
+function createCentralGlow(): Mesh {
+    const geometry = new SphereGeometry(3, 32, 32);
+    const material = new MeshBasicMaterial({
         color: 0x6366f1,
         transparent: true,
         opacity: 0.1,
         depthWrite: false,
-        blending: THREE.AdditiveBlending,
+        blending: AdditiveBlending,
     });
-    return new THREE.Mesh(geometry, material);
+    return new Mesh(geometry, material);
+}
+
+/**
+ * 递归释放场景中的所有几何体、材质和纹理
+ */
+function disposeScene(scene: Scene, textureCache: Map<string, Texture>): void {
+    scene.traverse((obj) => {
+        const anyObj = obj as unknown as { geometry?: { dispose?: () => void }; material?: unknown };
+        if (anyObj.geometry && typeof anyObj.geometry.dispose === 'function') {
+            anyObj.geometry.dispose();
+        }
+        if (anyObj.material) {
+            const materials = Array.isArray(anyObj.material) ? anyObj.material : [anyObj.material];
+            for (const mat of materials) {
+                const m = mat as { dispose?: () => void; map?: Texture | null };
+                if (typeof m.dispose === 'function') m.dispose();
+                if (m.map && m.map.isTexture) m.map.dispose();
+            }
+        }
+    });
+
+    // 释放缓存的发光纹理
+    textureCache.forEach((texture) => texture.dispose());
+    textureCache.clear();
 }
 
 /**
  * 清理 WebGL 资源（页面卸载时调用）
+ * 完整释放：geometry / material / texture / 事件监听
  */
 export function disposeWebGLBackground(): void {
     if (animFrameId !== null) {
         cancelAnimationFrame(animFrameId);
         animFrameId = null;
     }
+
+    // 执行所有注册的清理函数（事件监听 + 场景释放）
+    for (const cleanup of cleanupRefs) {
+        try {
+            cleanup();
+        } catch {
+            // 清理失败不阻断其他清理
+        }
+    }
+    cleanupRefs = [];
+
     if (rendererRef) {
         rendererRef.dispose();
         rendererRef.domElement.remove();
