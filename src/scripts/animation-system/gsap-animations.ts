@@ -37,6 +37,11 @@ export function initHeroAnimations(): void {
             { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.7)' },
             '-=0.5',
         );
+        tl.fromTo('#btn-minesweeper',
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.7)' },
+            '-=0.5',
+        );
 
         // Hero badge 淡入
         tl.fromTo('#hero-badge',

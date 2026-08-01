@@ -199,11 +199,12 @@ export function executeCosmicTransition(
 }
 
 /**
- * 初始化页面过渡：拦截 NASA 按钮和星际之旅按钮点击
+ * 初始化页面过渡：拦截 NASA 按钮、星际之旅按钮与扫雷按钮点击
  */
 export function initPageTransitions(): void {
     const nasaBtn = document.getElementById('btn-nasa');
     const journeyBtn = document.getElementById('btn-primary');
+    const minesweeperBtn = document.getElementById('btn-minesweeper');
 
     if (nasaBtn) {
         nasaBtn.addEventListener('click', (e) => {
@@ -220,6 +221,16 @@ export function initPageTransitions(): void {
             e.preventDefault();
             executeCosmicTransition(journeyBtn, {
                 targetUrl: '/journey.html',
+                duration: 1000,
+            });
+        });
+    }
+
+    if (minesweeperBtn) {
+        minesweeperBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            executeCosmicTransition(minesweeperBtn, {
+                targetUrl: '/minesweeper/',
                 duration: 1000,
             });
         });
