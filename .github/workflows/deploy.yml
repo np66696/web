@@ -27,7 +27,17 @@ jobs:
         run: npm run build
 
       - name: Deploy to Cloudflare
-        run: npx wrangler pages deploy dist --project-name=web
+        id: deploy
+        run: |
+          echo "=== Running wrangler pages deploy ==="
+          npx wrangler pages deploy dist --project-name=web 2>&1 | tee /tmp/deploy-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "Exit code: $EXIT_CODE"
+          exit $EXIT_CODE
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Show deployment output (on failure)
+        if: failure() && steps.deploy.outcome == 'failure'
+        run: cat /tmp/deploy-output.txt 2>/dev/null || echo "No output captured"
