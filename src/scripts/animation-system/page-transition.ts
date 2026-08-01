@@ -7,7 +7,7 @@ import gsap from 'gsap';
  */
 
 /** 允许的目标 URL 白名单 */
-const ALLOWED_TARGETS = ['/nasa.html', '/journey.html', '/index.html', '/'];
+const ALLOWED_TARGETS = ['/nasa.html', '/journey.html', '/minesweeper/', '/index.html', '/'];
 
 interface TransitionOptions {
     /** 过渡持续时间 (ms) */

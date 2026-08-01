@@ -50,8 +50,29 @@ const cleanupPlugin = (): Plugin => ({
     },
 });
 
+/**
+ * 修复 dev 服务器对 /minesweeper/ 的访问：
+ * Vite 的 SPA fallback（htmlFallbackMiddleware）只会在 root 下查找
+ * "minesweeper/index.html"，找不到就把请求重写为 /index.html（首页），
+ * 而该页面实际位于 public/minesweeper/index.html。
+ * 此中间件在内部中间件之前把路径改写为实际文件，仅开发服务器生效；
+ * 生产构建中 dist/minesweeper/index.html 由静态托管直接提供，无需处理。
+ */
+const devMinesweeperRewrite = (): Plugin => ({
+    name: 'dev-minesweeper-rewrite',
+    apply: 'serve',
+    configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+            if (req.url === '/minesweeper/' || req.url === '/minesweeper') {
+                req.url = '/minesweeper/index.html';
+            }
+            next();
+        });
+    },
+});
+
 export default defineConfig({
-    plugins: [cleanupPlugin()],
+    plugins: [cleanupPlugin(), devMinesweeperRewrite()],
     build: {
         outDir: 'dist',
         emptyOutDir: true,
