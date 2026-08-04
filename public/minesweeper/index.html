@@ -81,7 +81,7 @@ body {
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 select { font-family: inherit; }
 
-.hidden { display: none !important; }
+.overlay.hidden { display: none !important; }
 
 /* ---------- 布局 ---------- */
 .app {
@@ -1668,12 +1668,13 @@ select { font-family: inherit; }
   els.recordSave.addEventListener('click', () => {
     if (!pendingRecord) return;
     const name = els.recordName.value.trim() || '玩家';
-    const result = LB.addScore(pendingRecord.diff, pendingRecord.time, name);
+    const savedDiff = pendingRecord.diff;
+    const result = LB.addScore(savedDiff, pendingRecord.time, name);
     pendingRecord = null;
     closeOverlay(els.recordOverlay);
     sound.click();
     // 打开排行榜展示新成绩
-    lbActiveTab = result ? result.diff : lbActiveTab;
+    lbActiveTab = result ? savedDiff : lbActiveTab;
     renderLeaderboard();
     openOverlay(els.lbOverlay);
   });
