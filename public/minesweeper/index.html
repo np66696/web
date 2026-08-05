@@ -450,6 +450,22 @@ select { font-family: inherit; }
   .app-footer { font-size: 11px; }
 }
 
+/* ---------- 页面过渡 ---------- */
+#page-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--overlay);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+#page-transition-overlay.show {
+  display: block;
+  opacity: 1;
+}
+
 </style>
     <meta property="og:title" content="扫雷 · Minesweeper" />
     <meta property="og:description" content="经典扫雷游戏：三种难度、自定义棋盘、计时器与排行榜。在逻辑与直觉之间挑战自我。" />
@@ -555,6 +571,7 @@ select { font-family: inherit; }
       <label>记录你的名字 <input type="text" id="record-name" maxlength="12" placeholder="玩家" autocomplete="off"></label>
     </div>
     <div class="modal-actions">
+      <button class="btn ghost" data-close>取消</button>
       <button class="btn primary" id="record-save">保存</button>
     </div>
   </div>
@@ -1696,15 +1713,36 @@ select { font-family: inherit; }
     sound.click();
   });
 
-  // 关闭模态框：data-close 按钮 / 点击遮罩空白 / ESC
+  // 关闭模态框：仅 data-close 按钮 / ESC（不再点击遮罩空白关闭，防止误关成绩弹窗）
   document.querySelectorAll('.overlay').forEach((overlay) => {
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay || e.target.closest('[data-close]')) closeOverlay(overlay);
+      if (e.target.closest('[data-close]')) closeOverlay(overlay);
     });
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeAnyOverlay();
   });
+
+  // 返回主页过渡动画（纯 CSS transition，与站点其他子页的淡出效果一致）
+  (function initBackTransition() {
+    const backLink = document.querySelector('a[href="/"]');
+    if (!backLink) return;
+    backLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      const overlay = document.getElementById('page-transition-overlay');
+      if (!overlay) { window.location.href = '/'; return; }
+      // 显示遮罩并触发 CSS 淡入，动画完成后跳转
+      overlay.classList.add('show');
+      overlay.addEventListener('transitionend', function handler() {
+        overlay.removeEventListener('transitionend', handler);
+        window.location.href = '/';
+      });
+      // 兜底：transitionend 未触发时强制跳转
+      setTimeout(function () {
+        if (overlay.classList.contains('show')) window.location.href = '/';
+      }, 1000);
+    });
+  })();
 
   // 全局按钮点击音效 + 首次交互初始化音频
   document.addEventListener('click', (e) => {
@@ -1722,5 +1760,8 @@ select { font-family: inherit; }
 })();
 
 </script>
+
+<!-- 页面过渡层（返回主页时淡出效果） -->
+<div id="page-transition-overlay"></div>
 </body>
 </html>
