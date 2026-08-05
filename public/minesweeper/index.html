@@ -451,19 +451,22 @@ select { font-family: inherit; }
 }
 
 /* ---------- 页面过渡 ---------- */
+/* 注意：不能用 display:none 初始态——display 切换不会触发 opacity 过渡，
+   会导致无动画且 transitionend 不触发。用 visibility + opacity 组合。 */
 #page-transition-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
   background: var(--overlay);
-  display: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   pointer-events: none;
 }
 #page-transition-overlay.show {
-  display: block;
   opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
 }
 
 </style>
@@ -1521,6 +1524,27 @@ select { font-family: inherit; }
     updateMines();
   }
 
+  /**
+   * 彩蛋胜利：连点笑脸 100 次触发。
+   * 直接翻开全部非雷格并标记胜利，走与正常通关相同的 onWin 流程。
+   */
+  function faceWin() {
+    if (!game || game.status === STATUS.WON || game.status === STATUS.LOST) return;
+    // 若尚未开始（未点过任何格子），先布雷再全开
+    if (game.status === STATUS.IDLE) game.generateBoard(0, 0);
+    for (const row of game.board) {
+      for (const cell of row) {
+        if (!cell.isMine && cell.state !== STATE.REVEALED) {
+          cell.state = STATE.REVEALED;
+          game.revealedCount++;
+        }
+      }
+    }
+    game.status = STATUS.WON;
+    game.autoFlagRemaining();
+    onWin();
+  }
+
   /* ---------- 状态栏 ---------- */
 
   function updateFace() {
@@ -1653,7 +1677,20 @@ select { font-family: inherit; }
 
   els.difficulty.addEventListener('change', () => applyDifficulty(els.difficulty.value));
   els.newGame.addEventListener('click', () => applyDifficulty(diffKey));
-  els.face.addEventListener('click', () => applyDifficulty(diffKey));
+  // 彩蛋：2 秒内连点笑脸 100 次 → 直接胜利（经典扫雷彩蛋）
+  let faceClicks = 0;
+  let faceClickTimer = null;
+  els.face.addEventListener('click', () => {
+    faceClicks++;
+    clearTimeout(faceClickTimer);
+    faceClickTimer = setTimeout(() => { faceClicks = 0; }, 2000);
+    if (faceClicks >= 100) {
+      faceClicks = 0;
+      faceWin();
+    } else {
+      applyDifficulty(diffKey); // 正常功能：重开新局
+    }
+  });
   els.face.addEventListener('mousedown', () => { els.face.textContent = '😮'; });
   els.face.addEventListener('mouseup', () => updateFace());
   els.face.addEventListener('mouseleave', () => updateFace());
@@ -1731,16 +1768,10 @@ select { font-family: inherit; }
       e.preventDefault();
       const overlay = document.getElementById('page-transition-overlay');
       if (!overlay) { window.location.href = '/'; return; }
-      // 显示遮罩并触发 CSS 淡入，动画完成后跳转
+      // 显示遮罩触发 CSS 淡入（visibility+opacity，过渡必定触发）
       overlay.classList.add('show');
-      overlay.addEventListener('transitionend', function handler() {
-        overlay.removeEventListener('transitionend', handler);
-        window.location.href = '/';
-      });
-      // 兜底：transitionend 未触发时强制跳转
-      setTimeout(function () {
-        if (overlay.classList.contains('show')) window.location.href = '/';
-      }, 1000);
+      // 固定 350ms（过渡 300ms + 余量）后跳转，不依赖 transitionend，保证可靠
+      setTimeout(function () { window.location.href = '/'; }, 350);
     });
   })();
 
